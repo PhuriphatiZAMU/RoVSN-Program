@@ -1,0 +1,45 @@
+@import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&display=swap');
+
+/* --- Echo of Destiny Theme --- */
+:root {
+    --primary: #15C8FF;       /* Cyan Aura */
+    --primary-dark: #009BCF;  /* Darker shade for hover */
+    --secondary: #E8F7FF;     /* Echo White */
+}
+
+body {
+    font-family: 'Kanit', sans-serif;
+    background-color: var(--secondary); /* ใช้ Echo White เป็นพื้นหลัง */
+}
+
+/* Custom Utility Classes */
+.text-primary { color: var(--primary); }
+.bg-primary { background-color: var(--primary); }
+.bg-primary-hover:hover { background-color: var(--primary-dark); }
+.border-primary { border-color: var(--primary); }
+
+/* Animations */
+.animate-fade-in {
+    animation: fadeIn 0.5s ease-out;
+}
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Tabs */
+.tab-active {
+    border-bottom: 3px solid var(--primary);
+    color: var(--primary-dark);
+    font-weight: 600;
+}
+.tab-inactive {
+    color: #9ca3af;
+}
+
+/* Input Focus Ring Customization */
+.focus-ring-theme:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--primary);
+    border-color: var(--primary);
+}
