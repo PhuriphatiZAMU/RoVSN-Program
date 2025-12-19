@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ROV SN TOURNAMENT 2026</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&display=swap');
+        
+        /* --- Echo of Destiny Theme --- */
+        :root {
+            --primary: #15C8FF;       /* Cyan Aura */
+            --primary-dark: #009BCF;  /* Darker shade for hover */
+            --secondary: #E8F7FF;     /* Echo White */
+        }
+
+        body {
+            font-family: 'Kanit', sans-serif;
+            background-color: var(--secondary); /* ใช้ Echo White เป็นพื้นหลัง */
+        }
+
+        /* Custom Utility Classes */
+        .text-primary { color: var(--primary); }
+        .bg-primary { background-color: var(--primary); }
+        .bg-primary-hover:hover { background-color: var(--primary-dark); }
+        .border-primary { border-color: var(--primary); }
+        
+        /* Animations */
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Tabs */
+        .tab-active {
+            border-bottom: 3px solid var(--primary);
+            color: var(--primary-dark);
+            font-weight: 600;
+        }
+        .tab-inactive {
+            color: #9ca3af;
+        }
+        
+        /* Input Focus Ring Customization */
+        .focus-ring-theme:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px var(--primary);
+            border-color: var(--primary);
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <div class="container mx-auto px-4 py-8 max-w-4xl">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-2">🏆 ROV SN TOURNAMENT 2026</h1>
+            <p class="text-gray-500">League Phase: Modified Partial Round-Robin (BO3)</p>
+        </div>
+
+        <!-- Input Section -->
+        <div class="bg-white rounded-xl shadow-sm p-6 mb-6 border-t-4 border-primary">
+            <h2 class="text-lg font-semibold mb-4 flex items-center">
+                <i class="fas fa-users-cog mr-2 text-primary"></i> ตั้งค่าทีมแข่ง (16 ทีม)
+            </h2>
+            <textarea id="teamsInput" rows="6" class="w-full p-3 border border-gray-200 rounded-lg focus-ring-theme transition text-sm bg-gray-50" placeholder="กรอกชื่อทีม (บรรทัดละ 1 ทีม)">Team 1
+Team 2
+Team 3
+Team 4
+Team 5
+Team 6
+Team 7
+Team 8
+Team 9
+Team 10
+Team 11
+Team 12
+Team 13
+Team 14
+Team 15
+Team 16</textarea>
+            
+            <div class="mt-4">
+                <button onclick="generateSchedule()" class="w-full bg-primary bg-primary-hover text-white font-bold py-3 px-4 rounded-lg transition duration-200 shadow-md flex justify-center items-center text-lg">
+                    <i class="fas fa-bolt mr-2"></i> จับคู่แข่งขัน (Generate)
+                </button>
+            </div>
+            <p id="errorMsg" class="text-red-500 text-sm mt-2 hidden"></p>
+        </div>
+
+        <!-- Results Section (Hidden initially) -->
+        <div id="resultsArea" class="hidden space-y-8 animate-fade-in">
+            
+            <!-- Pots Display -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Pot A -->
+                <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
+                    <div class="bg-gradient-to-r from-cyan-500 to-blue-500 text-white p-3 text-center font-bold relative overflow-hidden">
+                        <span class="relative z-10">🔵 POT A</span>
+                        <!-- Decorative element -->
+                        <div class="absolute top-0 right-0 -mt-2 -mr-2 w-10 h-10 bg-white opacity-20 rotate-45 transform"></div>
+                    </div>
+                    <div class="p-4">
+                        <ul id="potAList" class="space-y-2 text-sm"></ul>
+                    </div>
+                </div>
+                <!-- Pot B -->
+                <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
+                    <div class="bg-gradient-to-r from-red-500 to-orange-500 text-white p-3 text-center font-bold relative overflow-hidden">
+                        <span class="relative z-10">🔴 POT B</span>
+                        <!-- Decorative element -->
+                        <div class="absolute top-0 right-0 -mt-2 -mr-2 w-10 h-10 bg-white opacity-20 rotate-45 transform"></div>
+                    </div>
+                    <div class="p-4">
+                        <ul id="potBList" class="space-y-2 text-sm"></ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Schedule -->
+            <div class="bg-white rounded-xl shadow-sm p-6 border-t-4 border-primary">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-bold flex items-center">
+                        <i class="fas fa-calendar-alt mr-2 text-gray-700"></i> ตารางการแข่งขัน
+                    </h2>
+                    <div class="text-xs font-bold text-primary bg-[var(--secondary)] px-3 py-1 rounded-full border border-primary">Total: 8 Match Days</div>
+                </div>
+
+                <!-- Tabs -->
+                <div class="flex border-b border-gray-200 mb-4">
+                    <button onclick="switchTab('list')" id="tab-list" class="flex-1 py-2 text-center tab-active hover:bg-gray-50 transition">ภาพรวม (List)</button>
+                    <button onclick="switchTab('day')" id="tab-day" class="flex-1 py-2 text-center tab-inactive hover:bg-gray-50 transition">แยกตามวัน (By Day)</button>
+                </div>
+
+                <!-- List View -->
+                <div id="view-list" class="overflow-x-auto">
+                    <table class="w-full text-sm text-left border-collapse">
+                        <thead class="bg-[var(--secondary)] text-gray-700 uppercase font-semibold">
+                            <tr>
+                                <th class="px-4 py-3 rounded-l-lg text-primary">Day</th>
+                                <th class="px-4 py-3">Phase</th>
+                                <th class="px-4 py-3 text-right">Blue Side</th>
+                                <th class="px-4 py-3 text-center">VS</th>
+                                <th class="px-4 py-3 text-left">Red Side</th>
+                                <th class="px-4 py-3 rounded-r-lg">Format</th>
+                            </tr>
+                        </thead>
+                        <tbody id="scheduleTableBody" class="divide-y divide-gray-100"></tbody>
+                    </table>
+                </div>
+
+                <!-- Day View -->
+                <div id="view-day" class="hidden space-y-4">
+                    <!-- Javascript will inject day cards here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Logic Functions ---
+
+        // Circle Method for Round Robin (Partial)
+        function generateInternalFixtures(teams) {
+            let n = teams.length;
+            let rounds = [];
+            let fixedTeam = teams[0];
+            let rotatingTeams = teams.slice(1);
+
+            // Generate all rounds then slice
+            for (let i = 0; i < n - 1; i++) {
+                let roundMatches = [];
+                // First pair
+                roundMatches.push([fixedTeam, rotatingTeams[0]]);
+                // Other pairs
+                for (let j = 1; j < n / 2; j++) {
+                    roundMatches.push([rotatingTeams[j], rotatingTeams[rotatingTeams.length - j]]);
+                }
+                rounds.push(roundMatches);
+                
+                // Rotate
+                rotatingTeams.push(rotatingTeams.shift());
+            }
+            return rounds.slice(0, 4); // Return first 4 rounds
+        }
+
+        // Cyclic Shift for Cross Group
+        function generateExternalFixtures(groupA, groupB) {
+            let rounds = [];
+            let n = groupA.length;
+            for (let r = 0; r < 4; r++) {
+                let roundMatches = [];
+                for (let i = 0; i < n; i++) {
+                    let teamA = groupA[i];
+                    let teamBIndex = (i + r) % n;
+                    let teamB = groupB[teamBIndex];
+                    roundMatches.push([teamA, teamB]);
+                }
+                rounds.push(roundMatches);
+            }
+            return rounds;
+        }
+
+        function shuffle(array) {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex != 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+
+        // --- UI Functions ---
+
+        function generateSchedule() {
+            const input = document.getElementById('teamsInput').value;
+            const teams = input.split('\n').map(t => t.trim()).filter(t => t !== "");
+            const errorMsg = document.getElementById('errorMsg');
+
+            if (teams.length !== 16) {
+                errorMsg.textContent = `❌ จำนวนทีมไม่ถูกต้อง: มี ${teams.length} ทีม (ต้องการ 16 ทีม)`;
+                errorMsg.classList.remove('hidden');
+                return;
+            } else {
+                errorMsg.classList.add('hidden');
+            }
+
+            // 1. Process Teams
+            const shuffledTeams = shuffle([...teams]);
+            const potA = shuffledTeams.slice(0, 8);
+            const potB = shuffledTeams.slice(8, 16);
+
+            // 2. Generate Rounds
+            const internalA = generateInternalFixtures(potA);
+            const internalB = generateInternalFixtures(potB);
+            const external = generateExternalFixtures(potA, potB);
+
+            let allRounds = [];
+            
+            // Phase 1: Internal (4 Days)
+            for(let i=0; i<4; i++) {
+                let combined = [...internalA[i], ...internalB[i]];
+                combined = shuffle(combined);
+                allRounds.push({ day: i+1, type: "Internal (Same Pot)", matches: combined });
+            }
+
+            // Phase 2: External (4 Days)
+            for(let i=0; i<4; i++) {
+                let matches = shuffle(external[i]);
+                allRounds.push({ day: i+5, type: "External (Cross Pot)", matches: matches });
+            }
+
+            // 3. Render
+            renderPots(potA, potB);
+            renderSchedule(allRounds);
+
+            // Show Results
+            document.getElementById('resultsArea').classList.remove('hidden');
+            // Scroll to results
+            document.getElementById('resultsArea').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function renderPots(potA, potB) {
+            const renderList = (teams, elId, badgeClass) => {
+                const el = document.getElementById(elId);
+                el.innerHTML = '';
+                teams.forEach((team, idx) => {
+                    el.innerHTML += `<li class="flex justify-between items-center py-2 border-b border-gray-100 last:border-0 hover:bg-gray-50 transition px-2 rounded">
+                        <span class="font-medium text-gray-700">${team}</span>
+                        <span class="text-xs font-mono bg-[var(--secondary)] text-primary px-2 py-1 rounded border border-primary/20">Seed ${idx+1}</span>
+                    </li>`;
+                });
+            };
+            renderList(potA, 'potAList');
+            renderList(potB, 'potBList');
+        }
+
+        function renderSchedule(rounds) {
+            const tableBody = document.getElementById('scheduleTableBody');
+            const dayView = document.getElementById('view-day');
+            tableBody.innerHTML = '';
+            dayView.innerHTML = '';
+
+            rounds.forEach(round => {
+                // List View
+                round.matches.forEach(match => {
+                    const row = `<tr class="bg-white border-b hover:bg-[var(--secondary)] transition duration-150">
+                        <td class="px-4 py-3 font-bold text-primary">Day ${round.day}</td>
+                        <td class="px-4 py-3 text-xs text-gray-500 font-medium">${round.type}</td>
+                        <td class="px-4 py-3 text-right font-semibold text-blue-600">${match[0]}</td>
+                        <td class="px-4 py-3 text-center text-gray-400 text-xs">VS</td>
+                        <td class="px-4 py-3 text-left font-semibold text-red-600">${match[1]}</td>
+                        <td class="px-4 py-3 text-gray-500 text-xs">BO3</td>
+                    </tr>`;
+                    tableBody.innerHTML += row;
+                });
+
+                // Day View
+                let dayCard = `<div class="bg-white rounded-lg p-0 border border-gray-200 overflow-hidden shadow-sm">
+                    <h3 class="font-bold text-gray-800 p-3 bg-gray-50 border-b flex justify-between items-center">
+                        <span class="text-primary"><i class="far fa-clock mr-1"></i> Match Day ${round.day}</span>
+                        <span class="text-xs font-normal bg-white px-2 py-1 rounded border text-gray-500">${round.type}</span>
+                    </h3>
+                    <div class="grid grid-cols-1 gap-2 p-3 bg-[var(--secondary)]">`;
+                
+                round.matches.forEach(match => {
+                    dayCard += `<div class="bg-white p-3 rounded shadow-sm flex justify-between items-center border border-gray-100 hover:shadow-md transition">
+                        <div class="w-5/12 text-right font-medium text-blue-700 truncate">${match[0]}</div>
+                        <div class="w-2/12 text-center">
+                             <span class="text-[10px] font-bold text-white bg-gray-300 px-2 py-0.5 rounded-full">VS</span>
+                        </div>
+                        <div class="w-5/12 text-left font-medium text-red-700 truncate">${match[1]}</div>
+                    </div>`;
+                });
+                dayCard += `</div></div>`;
+                dayView.innerHTML += dayCard;
+            });
+        }
+
+        function switchTab(tab) {
+            const listBtn = document.getElementById('tab-list');
+            const dayBtn = document.getElementById('tab-day');
+            const listView = document.getElementById('view-list');
+            const dayView = document.getElementById('view-day');
+
+            if (tab === 'list') {
+                listBtn.className = "flex-1 py-2 text-center tab-active transition duration-300";
+                dayBtn.className = "flex-1 py-2 text-center tab-inactive transition duration-300";
+                listView.classList.remove('hidden');
+                dayView.classList.add('hidden');
+            } else {
+                listBtn.className = "flex-1 py-2 text-center tab-inactive transition duration-300";
+                dayBtn.className = "flex-1 py-2 text-center tab-active transition duration-300";
+                listView.classList.add('hidden');
+                dayView.classList.remove('hidden');
+            }
+        }
+
+    </script>
+</body>
+</html>
