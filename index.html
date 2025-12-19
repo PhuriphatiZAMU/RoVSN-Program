@@ -7,7 +7,8 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link rel="icon" type="image/x-icon" href="RoV Logo.png">
+    <!-- Icon Placeholder -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏆</text></svg>">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&display=swap');
         
@@ -16,11 +17,12 @@
             --primary: #15C8FF;       /* Cyan Aura */
             --primary-dark: #009BCF;  /* Darker shade for hover */
             --secondary: #E8F7FF;     /* Echo White */
+            --accent: #FF4B4B;        /* Red for VS/Pot B */
         }
 
         body {
             font-family: 'Kanit', sans-serif;
-            background-color: var(--secondary); /* ใช้ Echo White เป็นพื้นหลัง */
+            background-color: var(--secondary);
         }
 
         /* Custom Utility Classes */
@@ -31,11 +33,29 @@
         
         /* Animations */
         .animate-fade-in {
-            animation: fadeIn 0.5s ease-out;
+            animation: fadeIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+            opacity: 0;
+            transform: translateY(10px);
         }
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-scale-up {
+            animation: scaleUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+        @keyframes scaleUp {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .animate-slide-up {
+            animation: slideUp 0.4s ease-out forwards;
+        }
+        @keyframes slideUp {
+            0% { transform: translateY(20px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
         }
 
         /* Tabs */
@@ -48,15 +68,32 @@
             color: #9ca3af;
         }
         
-        /* Input Focus Ring Customization */
+        /* Input Focus Ring */
         .focus-ring-theme:focus {
             outline: none;
             box-shadow: 0 0 0 2px var(--primary);
             border-color: var(--primary);
         }
+
+        /* Reveal Modal Styles */
+        .reveal-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+        }
+        .team-name-lg {
+            font-size: 1.5rem;
+            font-weight: 700;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .vs-badge-lg {
+            width: 60px;
+            height: 60px;
+            font-size: 1.2rem;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
     </style>
 </head>
-<body class="text-gray-800">
+<body class="text-gray-800 relative">
 
     <div class="container mx-auto px-4 py-8 max-w-4xl">
         <!-- Header -->
@@ -70,7 +107,7 @@
             <h2 class="text-lg font-semibold mb-4 flex items-center">
                 <i class="fas fa-users-cog mr-2 text-primary"></i> ตั้งค่าทีมแข่ง (16 ทีม)
             </h2>
-            <textarea id="teamsInput" rows="6" class="w-full p-3 border border-gray-200 rounded-lg focus-ring-theme transition text-sm bg-gray-50" placeholder="กรอกชื่อทีม (บรรทัดละ 1 ทีม)">Team 1
+            <textarea id="teamsInput" rows="6" class="w-full p-3 border border-gray-200 rounded-lg focus-ring-theme transition text-sm bg-gray-50 font-mono" placeholder="กรอกชื่อทีม (บรรทัดละ 1 ทีม)">Team 1
 Team 2
 Team 3
 Team 4
@@ -88,23 +125,22 @@ Team 15
 Team 16</textarea>
             
             <div class="mt-4">
-                <button onclick="generateSchedule()" class="w-full bg-primary bg-primary-hover text-white font-bold py-3 px-4 rounded-lg transition duration-200 shadow-md flex justify-center items-center text-lg">
-                    <i class="fas fa-bolt mr-2"></i> จับคู่แข่งขัน (Generate)
+                <button id="generateBtn" onclick="generateSchedule()" class="w-full bg-primary bg-primary-hover text-white font-bold py-3 px-4 rounded-lg transition duration-200 shadow-md flex justify-center items-center text-lg transform hover:scale-[1.01] active:scale-[0.99]">
+                    <i class="fas fa-play-circle mr-2"></i> เปิดเผยตารางแข่งขัน (Schedule Reveal)
                 </button>
             </div>
             <p id="errorMsg" class="text-red-500 text-sm mt-2 hidden"></p>
         </div>
 
         <!-- Results Section (Hidden initially) -->
-        <div id="resultsArea" class="hidden space-y-8 animate-fade-in">
+        <div id="resultsArea" class="hidden space-y-8">
             
             <!-- Pots Display -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Pot A -->
-                <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
+                <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100 animate-fade-in" style="animation-delay: 0.1s;">
                     <div class="bg-gradient-to-r from-cyan-500 to-blue-500 text-white p-3 text-center font-bold relative overflow-hidden">
                         <span class="relative z-10">🔵 POT A</span>
-                        <!-- Decorative element -->
                         <div class="absolute top-0 right-0 -mt-2 -mr-2 w-10 h-10 bg-white opacity-20 rotate-45 transform"></div>
                     </div>
                     <div class="p-4">
@@ -112,10 +148,9 @@ Team 16</textarea>
                     </div>
                 </div>
                 <!-- Pot B -->
-                <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
+                <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100 animate-fade-in" style="animation-delay: 0.2s;">
                     <div class="bg-gradient-to-r from-red-500 to-orange-500 text-white p-3 text-center font-bold relative overflow-hidden">
                         <span class="relative z-10">🔴 POT B</span>
-                        <!-- Decorative element -->
                         <div class="absolute top-0 right-0 -mt-2 -mr-2 w-10 h-10 bg-white opacity-20 rotate-45 transform"></div>
                     </div>
                     <div class="p-4">
@@ -125,7 +160,7 @@ Team 16</textarea>
             </div>
 
             <!-- Schedule -->
-            <div class="bg-white rounded-xl shadow-sm p-6 border-t-4 border-primary">
+            <div class="bg-white rounded-xl shadow-sm p-6 border-t-4 border-primary animate-fade-in" style="animation-delay: 0.3s;">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-xl font-bold flex items-center">
                         <i class="fas fa-calendar-alt mr-2 text-gray-700"></i> ตารางการแข่งขัน
@@ -164,34 +199,102 @@ Team 16</textarea>
         </div>
     </div>
 
-    <script>
-        // --- Logic Functions ---
+    <!-- Match Reveal Modal (Pop Up) -->
+    <div id="revealModal" class="fixed inset-0 bg-gray-900 bg-opacity-95 flex items-center justify-center z-50 hidden backdrop-blur-md transition-opacity duration-300">
+        <div class="w-full max-w-3xl mx-4 relative">
+            
+            <!-- Skip Button -->
+            <button onclick="skipAnimation()" class="absolute -top-12 right-0 text-white text-sm hover:text-primary transition flex items-center bg-gray-800 px-3 py-1 rounded-full border border-gray-700 z-50">
+                <i class="fas fa-forward mr-2"></i> ข้ามทั้งหมด (Skip)
+            </button>
 
-        // Circle Method for Round Robin (Partial)
+            <!-- Card Container -->
+            <div class="reveal-card bg-white rounded-3xl shadow-2xl overflow-hidden text-center relative p-8 border-4 border-primary/20">
+                
+                <!-- Match Day Header -->
+                <div class="mb-8">
+                    <span id="revealDayBadge" class="bg-primary text-white px-4 py-1 rounded-full text-sm font-bold uppercase tracking-widest shadow-lg animate-slide-up">
+                        Match Day 1
+                    </span>
+                    <h2 id="revealPhase" class="text-gray-400 text-sm mt-3 uppercase tracking-wider font-semibold animate-slide-up" style="animation-delay: 0.1s;">
+                        Internal Phase
+                    </h2>
+                </div>
+
+                <!-- The Matchup -->
+                <div class="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-10 my-8">
+                    
+                    <!-- Team Blue -->
+                    <div class="flex-1 w-full animate-scale-up" style="animation-delay: 0.2s;">
+                        <div class="bg-blue-50 border-2 border-blue-100 rounded-2xl p-6 shadow-sm hover:shadow-md transition transform hover:-translate-y-1">
+                            <div class="text-blue-500 text-xs font-bold uppercase mb-2">Blue Side</div>
+                            <div id="revealTeamA" class="team-name-lg text-blue-700 break-words leading-tight">
+                                Team A
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- VS Badge -->
+                    <div class="animate-pop-in" style="animation-delay: 0.4s;">
+                        <div class="vs-badge-lg rounded-full bg-gradient-to-br from-gray-800 to-gray-900 text-white flex items-center justify-center font-black border-4 border-white z-10 relative">
+                            VS
+                        </div>
+                    </div>
+
+                    <!-- Team Red -->
+                    <div class="flex-1 w-full animate-scale-up" style="animation-delay: 0.3s;">
+                        <div class="bg-red-50 border-2 border-red-100 rounded-2xl p-6 shadow-sm hover:shadow-md transition transform hover:-translate-y-1">
+                            <div class="text-red-500 text-xs font-bold uppercase mb-2">Red Side</div>
+                            <div id="revealTeamB" class="team-name-lg text-red-700 break-words leading-tight">
+                                Team B
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Footer / Progress -->
+                <div class="mt-8">
+                    <div class="text-gray-400 text-xs mb-2 flex justify-between">
+                        <span id="matchCounter">Match 1 of 8 (Day 1)</span>
+                        <span class="animate-pulse text-primary">Live Revealing...</span>
+                    </div>
+                    <div class="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
+                        <div id="revealProgressBar" class="bg-primary h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Helper: Sleep ---
+        const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+        let skipTriggered = false;
+
+        function skipAnimation() {
+            skipTriggered = true;
+        }
+
+        // --- Logic Functions ---
         function generateInternalFixtures(teams) {
             let n = teams.length;
             let rounds = [];
             let fixedTeam = teams[0];
             let rotatingTeams = teams.slice(1);
-
-            // Generate all rounds then slice
             for (let i = 0; i < n - 1; i++) {
                 let roundMatches = [];
-                // First pair
                 roundMatches.push([fixedTeam, rotatingTeams[0]]);
-                // Other pairs
                 for (let j = 1; j < n / 2; j++) {
                     roundMatches.push([rotatingTeams[j], rotatingTeams[rotatingTeams.length - j]]);
                 }
                 rounds.push(roundMatches);
-                
-                // Rotate
                 rotatingTeams.push(rotatingTeams.shift());
             }
-            return rounds.slice(0, 4); // Return first 4 rounds
+            return rounds.slice(0, 4);
         }
 
-        // Cyclic Shift for Cross Group
         function generateExternalFixtures(groupA, groupB) {
             let rounds = [];
             let n = groupA.length;
@@ -218,13 +321,76 @@ Team 16</textarea>
             return array;
         }
 
-        // --- UI Functions ---
+        // --- Schedule Reveal Animation Logic ---
+        async function runScheduleReveal(schedule) {
+            const modal = document.getElementById('revealModal');
+            const dayBadge = document.getElementById('revealDayBadge');
+            const phaseText = document.getElementById('revealPhase');
+            const teamAEl = document.getElementById('revealTeamA');
+            const teamBEl = document.getElementById('revealTeamB');
+            const counter = document.getElementById('matchCounter');
+            const progressBar = document.getElementById('revealProgressBar');
 
-        function generateSchedule() {
+            skipTriggered = false;
+            modal.classList.remove('hidden');
+
+            // --- SET DELAY HERE ---
+            // ปรับแก้ Delay เป็น 10 วินาที (10000 ms) เพื่อให้คนดูสามารถดูได้ทัน
+            const DISPLAY_DELAY = 10000; 
+            // ----------------------
+
+            let totalMatches = 0;
+            schedule.forEach(r => totalMatches += r.matches.length);
+            let currentMatchCount = 0;
+
+            // Loop through each Day
+            for (const round of schedule) {
+                if (skipTriggered) break;
+
+                // Loop through each Match in the Day
+                for (let i = 0; i < round.matches.length; i++) {
+                    if (skipTriggered) break;
+                    
+                    const match = round.matches[i];
+                    currentMatchCount++;
+
+                    // Update UI
+                    dayBadge.textContent = `Match Day ${round.day}`;
+                    phaseText.textContent = round.type;
+                    
+                    // Reset Animation classes to trigger re-flow
+                    teamAEl.parentElement.parentElement.classList.remove('animate-scale-up');
+                    teamBEl.parentElement.parentElement.classList.remove('animate-scale-up');
+                    void teamAEl.offsetWidth; // Trigger reflow
+                    
+                    // Set Content
+                    teamAEl.textContent = match[0];
+                    teamBEl.textContent = match[1];
+                    counter.textContent = `Match ${i+1} of ${round.matches.length} (Total Progress: ${Math.round((currentMatchCount/totalMatches)*100)}%)`;
+                    progressBar.style.width = `${(currentMatchCount/totalMatches)*100}%`;
+
+                    // Add Animation classes back
+                    teamAEl.parentElement.parentElement.classList.add('animate-scale-up');
+                    teamBEl.parentElement.parentElement.classList.add('animate-scale-up');
+
+                    // Wait
+                    await sleep(DISPLAY_DELAY);
+                }
+            }
+
+            modal.classList.add('hidden');
+        }
+
+        // --- Main Controller ---
+
+        async function generateSchedule() {
             const input = document.getElementById('teamsInput').value;
             const teams = input.split('\n').map(t => t.trim()).filter(t => t !== "");
             const errorMsg = document.getElementById('errorMsg');
+            const resultsArea = document.getElementById('resultsArea');
+            const btn = document.getElementById('generateBtn');
 
+            // Validation
             if (teams.length !== 16) {
                 errorMsg.textContent = `❌ จำนวนทีมไม่ถูกต้อง: มี ${teams.length} ทีม (ต้องการ 16 ทีม)`;
                 errorMsg.classList.remove('hidden');
@@ -233,12 +399,15 @@ Team 16</textarea>
                 errorMsg.classList.add('hidden');
             }
 
-            // 1. Process Teams
+            btn.disabled = true;
+            resultsArea.classList.add('hidden');
+
+            // 1. Process Teams (Logic)
             const shuffledTeams = shuffle([...teams]);
             const potA = shuffledTeams.slice(0, 8);
             const potB = shuffledTeams.slice(8, 16);
 
-            // 2. Generate Rounds
+            // 2. Generate Rounds First
             const internalA = generateInternalFixtures(potA);
             const internalB = generateInternalFixtures(potB);
             const external = generateExternalFixtures(potA, potB);
@@ -258,14 +427,17 @@ Team 16</textarea>
                 allRounds.push({ day: i+5, type: "External (Cross Pot)", matches: matches });
             }
 
-            // 3. Render
+            // 3. Render Background Data (Hidden until reveal done)
             renderPots(potA, potB);
             renderSchedule(allRounds);
 
-            // Show Results
-            document.getElementById('resultsArea').classList.remove('hidden');
-            // Scroll to results
-            document.getElementById('resultsArea').scrollIntoView({ behavior: 'smooth' });
+            // 4. Run Schedule Reveal Animation
+            await runScheduleReveal(allRounds);
+
+            // 5. Show Final Tables
+            resultsArea.classList.remove('hidden');
+            resultsArea.scrollIntoView({ behavior: 'smooth' });
+            btn.disabled = false;
         }
 
         function renderPots(potA, potB) {
@@ -289,10 +461,12 @@ Team 16</textarea>
             tableBody.innerHTML = '';
             dayView.innerHTML = '';
 
+            let rowDelay = 0;
+
             rounds.forEach(round => {
                 // List View
                 round.matches.forEach(match => {
-                    const row = `<tr class="bg-white border-b hover:bg-[var(--secondary)] transition duration-150">
+                    const row = `<tr class="bg-white border-b hover:bg-[var(--secondary)] transition duration-150 animate-fade-in" style="animation-delay: ${rowDelay}ms; animation-fill-mode: both;">
                         <td class="px-4 py-3 font-bold text-primary">Day ${round.day}</td>
                         <td class="px-4 py-3 text-xs text-gray-500 font-medium">${round.type}</td>
                         <td class="px-4 py-3 text-right font-semibold text-blue-600">${match[0]}</td>
@@ -302,9 +476,10 @@ Team 16</textarea>
                     </tr>`;
                     tableBody.innerHTML += row;
                 });
+                rowDelay += 50;
 
                 // Day View
-                let dayCard = `<div class="bg-white rounded-lg p-0 border border-gray-200 overflow-hidden shadow-sm">
+                let dayCard = `<div class="bg-white rounded-lg p-0 border border-gray-200 overflow-hidden shadow-sm animate-fade-in" style="animation-delay: ${rowDelay}ms; animation-fill-mode: both;">
                     <h3 class="font-bold text-gray-800 p-3 bg-gray-50 border-b flex justify-between items-center">
                         <span class="text-primary"><i class="far fa-clock mr-1"></i> Match Day ${round.day}</span>
                         <span class="text-xs font-normal bg-white px-2 py-1 rounded border text-gray-500">${round.type}</span>
