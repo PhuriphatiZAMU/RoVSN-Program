@@ -6,111 +6,18 @@
     <title>ROV SN TOURNAMENT 2026</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <!-- Icon Placeholder -->
+    <!-- Favicon -->
     <link rel="icon" href="RoV Logo.png" type="image/png">
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&display=swap');
-        
-        /* --- Echo of Destiny Theme --- */
-        :root {
-            --primary: #15C8FF;       /* Cyan Aura */
-            --primary-dark: #009BCF;  /* Darker shade for hover */
-            --secondary: #E8F7FF;     /* Echo White */
-            --accent: #FF4B4B;        /* Red for VS/Pot B */
-        }
-
-        body {
-            font-family: 'Kanit', sans-serif;
-            background-color: var(--secondary);
-        }
-
-        /* Custom Utility Classes */
-        .text-primary { color: var(--primary); }
-        .bg-primary { background-color: var(--primary); }
-        .bg-primary-hover:hover { background-color: var(--primary-dark); }
-        .border-primary { border-color: var(--primary); }
-        
-        /* Animations */
-        .animate-fade-in {
-            animation: fadeIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-            opacity: 0;
-            transform: translateY(10px);
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .animate-scale-up {
-            animation: scaleUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-        }
-        @keyframes scaleUp {
-            0% { transform: scale(0.8); opacity: 0; }
-            100% { transform: scale(1); opacity: 1; }
-        }
-
-        .animate-slide-up {
-            animation: slideUp 0.4s ease-out forwards;
-        }
-        @keyframes slideUp {
-            0% { transform: translateY(20px); opacity: 0; }
-            100% { transform: translateY(0); opacity: 1; }
-        }
-
-        /* Loading Screen Animation */
-        .animate-pulse-logo {
-            animation: pulseLogo 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-        }
-        @keyframes pulseLogo {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: .85; transform: scale(1.05); }
-        }
-
-        /* Tabs */
-        .tab-active {
-            border-bottom: 3px solid var(--primary);
-            color: var(--primary-dark);
-            font-weight: 600;
-        }
-        .tab-inactive {
-            color: #9ca3af;
-        }
-        
-        /* Input Focus Ring */
-        .focus-ring-theme:focus {
-            outline: none;
-            box-shadow: 0 0 0 2px var(--primary);
-            border-color: var(--primary);
-        }
-
-        /* Reveal Modal Styles */
-        .reveal-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-        }
-        .team-name-lg {
-            font-size: 1.5rem;
-            font-weight: 700;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .vs-badge-lg {
-            width: 60px;
-            height: 60px;
-            font-size: 1.2rem;
-            box-shadow: 0 0 20px rgba(0,0,0,0.1);
-        }
-    </style>
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body class="text-gray-800 relative">
 
-    <!-- Loading Screen Overlay -->
+    <!-- Loading Screen -->
     <div id="loadingScreen" class="fixed inset-0 bg-[#E8F7FF] z-[100] flex flex-col items-center justify-center transition-opacity duration-700 ease-out">
         <div class="relative flex flex-col items-center">
-            <!-- 
-                ✅ นำไฟล์ Logo ของคุณ (เช่น Gemini_Generated_Image.jpg) มาวางแทนที่ src ด้านล่างนี้ 
-                หรือเปลี่ยน path ให้ถูกต้อง 
-            -->
             <div class="w-40 h-40 md:w-56 md:h-56 bg-white rounded-full shadow-2xl flex items-center justify-center border-4 border-[#15C8FF] animate-pulse-logo mb-6 overflow-hidden p-2">
                 <img src="RoV Logo.png" class="w-full h-full object-cover rounded-full" alt="RoV Logo">
             </div>
@@ -129,7 +36,7 @@
             <p class="text-gray-500">League Phase: Modified Partial Round-Robin (BO3)</p>
         </div>
 
-        <!-- Input Section -->
+        <!-- Team Input Section -->
         <div class="bg-white rounded-xl shadow-sm p-6 mb-6 border-t-4 border-primary">
             <h2 class="text-lg font-semibold mb-4 flex items-center">
                 <i class="fas fa-users-cog mr-2 text-primary"></i> ตั้งค่าทีมแข่ง (16 ทีม)
@@ -159,26 +66,25 @@ Team 16</textarea>
             <p id="errorMsg" class="text-red-500 text-sm mt-2 hidden"></p>
         </div>
 
-        <!-- Results Section (Hidden initially) -->
+        <!-- Results Section -->
         <div id="resultsArea" class="hidden space-y-8">
             
             <!-- Pots Display -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6"
                 <!-- Pot A -->
                 <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100 animate-fade-in" style="animation-delay: 0.1s;">
                     <div class="bg-gradient-to-r from-cyan-500 to-blue-500 text-white p-3 text-center font-bold relative overflow-hidden">
                         <span class="relative z-10">🔵 POT A</span>
-                        <div class="absolute top-0 right-0 -mt-2 -mr-2 w-10 h-10 bg-white opacity-20 rotate-45 transform"></div>
                     </div>
                     <div class="p-4">
                         <ul id="potAList" class="space-y-2 text-sm"></ul>
                     </div>
                 </div>
+
                 <!-- Pot B -->
                 <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100 animate-fade-in" style="animation-delay: 0.2s;">
                     <div class="bg-gradient-to-r from-red-500 to-orange-500 text-white p-3 text-center font-bold relative overflow-hidden">
                         <span class="relative z-10">🔴 POT B</span>
-                        <div class="absolute top-0 right-0 -mt-2 -mr-2 w-10 h-10 bg-white opacity-20 rotate-45 transform"></div>
                     </div>
                     <div class="p-4">
                         <ul id="potBList" class="space-y-2 text-sm"></ul>
@@ -192,13 +98,19 @@ Team 16</textarea>
                     <h2 class="text-xl font-bold flex items-center">
                         <i class="fas fa-calendar-alt mr-2 text-gray-700"></i> ตารางการแข่งขัน
                     </h2>
-                    <div class="text-xs font-bold text-primary bg-[var(--secondary)] px-3 py-1 rounded-full border border-primary">Total: 8 Match Days</div>
+                    <div class="text-xs font-bold text-primary bg-[var(--secondary)] px-3 py-1 rounded-full border border-primary">
+                        Total: 8 Match Days
+                    </div>
                 </div>
 
-                <!-- Tabs -->
+                <!-- View Tabs -->
                 <div class="flex border-b border-gray-200 mb-4">
-                    <button onclick="switchTab('list')" id="tab-list" class="flex-1 py-2 text-center tab-active hover:bg-gray-50 transition">ภาพรวม (List)</button>
-                    <button onclick="switchTab('day')" id="tab-day" class="flex-1 py-2 text-center tab-inactive hover:bg-gray-50 transition">แยกตามวัน (By Day)</button>
+                    <button onclick="switchTab('list')" id="tab-list" class="flex-1 py-2 text-center tab-active hover:bg-gray-50 transition">
+                        ภาพรวม (List)
+                    </button>
+                    <button onclick="switchTab('day')" id="tab-day" class="flex-1 py-2 text-center tab-inactive hover:bg-gray-50 transition">
+                        แยกตามวัน (By Day)
+                    </button>
                 </div>
 
                 <!-- List View -->
@@ -219,14 +131,12 @@ Team 16</textarea>
                 </div>
 
                 <!-- Day View -->
-                <div id="view-day" class="hidden space-y-4">
-                    <!-- Javascript will inject day cards here -->
-                </div>
+                <div id="view-day" class="hidden space-y-4"></div>
             </div>
         </div>
     </div>
 
-    <!-- Match Reveal Modal (Pop Up) -->
+    <!-- Match Reveal Modal -->
     <div id="revealModal" class="fixed inset-0 bg-gray-900 bg-opacity-95 flex items-center justify-center z-50 hidden backdrop-blur-md transition-opacity duration-300">
         <div class="w-full max-w-3xl mx-4 relative">
             
@@ -235,7 +145,7 @@ Team 16</textarea>
                 <i class="fas fa-forward mr-2"></i> ข้ามทั้งหมด (Skip)
             </button>
 
-            <!-- Card Container -->
+            <!-- Reveal Card -->
             <div class="reveal-card bg-white rounded-3xl shadow-2xl overflow-hidden text-center relative p-8 border-4 border-primary/20">
                 
                 <!-- Match Day Header -->
@@ -248,16 +158,14 @@ Team 16</textarea>
                     </h2>
                 </div>
 
-                <!-- The Matchup -->
+                <!-- Matchup -->
                 <div class="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-10 my-8">
                     
                     <!-- Team Blue -->
                     <div class="flex-1 w-full animate-scale-up" style="animation-delay: 0.2s;">
                         <div class="bg-blue-50 border-2 border-blue-100 rounded-2xl p-6 shadow-sm hover:shadow-md transition transform hover:-translate-y-1">
                             <div class="text-blue-500 text-xs font-bold uppercase mb-2">Blue Side</div>
-                            <div id="revealTeamA" class="team-name-lg text-blue-700 break-words leading-tight">
-                                Team A
-                            </div>
+                            <div id="revealTeamA" class="team-name-lg text-blue-700 break-words leading-tight">Team A</div>
                         </div>
                     </div>
 
@@ -272,9 +180,7 @@ Team 16</textarea>
                     <div class="flex-1 w-full animate-scale-up" style="animation-delay: 0.3s;">
                         <div class="bg-red-50 border-2 border-red-100 rounded-2xl p-6 shadow-sm hover:shadow-md transition transform hover:-translate-y-1">
                             <div class="text-red-500 text-xs font-bold uppercase mb-2">Red Side</div>
-                            <div id="revealTeamB" class="team-name-lg text-red-700 break-words leading-tight">
-                                Team B
-                            </div>
+                            <div id="revealTeamB" class="team-name-lg text-red-700 break-words leading-tight">Team B</div>
                         </div>
                     </div>
 
@@ -295,269 +201,7 @@ Team 16</textarea>
         </div>
     </div>
 
-    <script>
-        // --- Helper: Sleep ---
-        const sleep = (ms) => new Promise(r => setTimeout(r, ms));
-        let skipTriggered = false;
-
-        function skipAnimation() {
-            skipTriggered = true;
-        }
-
-        // --- Logic Functions ---
-        function generateInternalFixtures(teams) {
-            let n = teams.length;
-            let rounds = [];
-            let fixedTeam = teams[0];
-            let rotatingTeams = teams.slice(1);
-            for (let i = 0; i < n - 1; i++) {
-                let roundMatches = [];
-                roundMatches.push([fixedTeam, rotatingTeams[0]]);
-                for (let j = 1; j < n / 2; j++) {
-                    roundMatches.push([rotatingTeams[j], rotatingTeams[rotatingTeams.length - j]]);
-                }
-                rounds.push(roundMatches);
-                rotatingTeams.push(rotatingTeams.shift());
-            }
-            return rounds.slice(0, 4);
-        }
-
-        function generateExternalFixtures(groupA, groupB) {
-            let rounds = [];
-            let n = groupA.length;
-            for (let r = 0; r < 4; r++) {
-                let roundMatches = [];
-                for (let i = 0; i < n; i++) {
-                    let teamA = groupA[i];
-                    let teamBIndex = (i + r) % n;
-                    let teamB = groupB[teamBIndex];
-                    roundMatches.push([teamA, teamB]);
-                }
-                rounds.push(roundMatches);
-            }
-            return rounds;
-        }
-
-        function shuffle(array) {
-            let currentIndex = array.length, randomIndex;
-            while (currentIndex != 0) {
-                randomIndex = Math.floor(Math.random() * currentIndex);
-                currentIndex--;
-                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
-            }
-            return array;
-        }
-
-        // --- Schedule Reveal Animation Logic ---
-        async function runScheduleReveal(schedule) {
-            const modal = document.getElementById('revealModal');
-            const dayBadge = document.getElementById('revealDayBadge');
-            const phaseText = document.getElementById('revealPhase');
-            const teamAEl = document.getElementById('revealTeamA');
-            const teamBEl = document.getElementById('revealTeamB');
-            const counter = document.getElementById('matchCounter');
-            const progressBar = document.getElementById('revealProgressBar');
-
-            skipTriggered = false;
-            modal.classList.remove('hidden');
-
-            // --- SET DELAY HERE ---
-            // ปรับแก้ Delay เป็น 10 วินาที (10000 ms) เพื่อให้คนดูสามารถดูได้ทัน
-            const DISPLAY_DELAY = 10000; 
-            // ----------------------
-
-            let totalMatches = 0;
-            schedule.forEach(r => totalMatches += r.matches.length);
-            let currentMatchCount = 0;
-
-            // Loop through each Day
-            for (const round of schedule) {
-                if (skipTriggered) break;
-
-                // Loop through each Match in the Day
-                for (let i = 0; i < round.matches.length; i++) {
-                    if (skipTriggered) break;
-                    
-                    const match = round.matches[i];
-                    currentMatchCount++;
-
-                    // Update UI
-                    dayBadge.textContent = `Match Day ${round.day}`;
-                    phaseText.textContent = round.type;
-                    
-                    // Reset Animation classes to trigger re-flow
-                    teamAEl.parentElement.parentElement.classList.remove('animate-scale-up');
-                    teamBEl.parentElement.parentElement.classList.remove('animate-scale-up');
-                    void teamAEl.offsetWidth; // Trigger reflow
-                    
-                    // Set Content
-                    teamAEl.textContent = match[0];
-                    teamBEl.textContent = match[1];
-                    counter.textContent = `Match ${i+1} of ${round.matches.length} (Total Progress: ${Math.round((currentMatchCount/totalMatches)*100)}%)`;
-                    progressBar.style.width = `${(currentMatchCount/totalMatches)*100}%`;
-
-                    // Add Animation classes back
-                    teamAEl.parentElement.parentElement.classList.add('animate-scale-up');
-                    teamBEl.parentElement.parentElement.classList.add('animate-scale-up');
-
-                    // Wait
-                    await sleep(DISPLAY_DELAY);
-                }
-            }
-
-            modal.classList.add('hidden');
-        }
-
-        // --- Main Controller ---
-
-        async function generateSchedule() {
-            const input = document.getElementById('teamsInput').value;
-            const teams = input.split('\n').map(t => t.trim()).filter(t => t !== "");
-            const errorMsg = document.getElementById('errorMsg');
-            const resultsArea = document.getElementById('resultsArea');
-            const btn = document.getElementById('generateBtn');
-
-            // Validation
-            if (teams.length !== 16) {
-                errorMsg.textContent = `❌ จำนวนทีมไม่ถูกต้อง: มี ${teams.length} ทีม (ต้องการ 16 ทีม)`;
-                errorMsg.classList.remove('hidden');
-                return;
-            } else {
-                errorMsg.classList.add('hidden');
-            }
-
-            btn.disabled = true;
-            resultsArea.classList.add('hidden');
-
-            // 1. Process Teams (Logic)
-            const shuffledTeams = shuffle([...teams]);
-            const potA = shuffledTeams.slice(0, 8);
-            const potB = shuffledTeams.slice(8, 16);
-
-            // 2. Generate Rounds First
-            const internalA = generateInternalFixtures(potA);
-            const internalB = generateInternalFixtures(potB);
-            const external = generateExternalFixtures(potA, potB);
-
-            let allRounds = [];
-            
-            // Phase 1: Internal (4 Days)
-            for(let i=0; i<4; i++) {
-                let combined = [...internalA[i], ...internalB[i]];
-                combined = shuffle(combined);
-                allRounds.push({ day: i+1, type: "Internal (Same Pot)", matches: combined });
-            }
-
-            // Phase 2: External (4 Days)
-            for(let i=0; i<4; i++) {
-                let matches = shuffle(external[i]);
-                allRounds.push({ day: i+5, type: "External (Cross Pot)", matches: matches });
-            }
-
-            // 3. Render Background Data (Hidden until reveal done)
-            renderPots(potA, potB);
-            renderSchedule(allRounds);
-
-            // 4. Run Schedule Reveal Animation
-            await runScheduleReveal(allRounds);
-
-            // 5. Show Final Tables
-            resultsArea.classList.remove('hidden');
-            resultsArea.scrollIntoView({ behavior: 'smooth' });
-            btn.disabled = false;
-        }
-
-        function renderPots(potA, potB) {
-            const renderList = (teams, elId, badgeClass) => {
-                const el = document.getElementById(elId);
-                el.innerHTML = '';
-                teams.forEach((team, idx) => {
-                    el.innerHTML += `<li class="flex justify-between items-center py-2 border-b border-gray-100 last:border-0 hover:bg-gray-50 transition px-2 rounded">
-                        <span class="font-medium text-gray-700">${team}</span>
-                        <span class="text-xs font-mono bg-[var(--secondary)] text-primary px-2 py-1 rounded border border-primary/20">Seed ${idx+1}</span>
-                    </li>`;
-                });
-            };
-            renderList(potA, 'potAList');
-            renderList(potB, 'potBList');
-        }
-
-        function renderSchedule(rounds) {
-            const tableBody = document.getElementById('scheduleTableBody');
-            const dayView = document.getElementById('view-day');
-            tableBody.innerHTML = '';
-            dayView.innerHTML = '';
-
-            let rowDelay = 0;
-
-            rounds.forEach(round => {
-                // List View
-                round.matches.forEach(match => {
-                    const row = `<tr class="bg-white border-b hover:bg-[var(--secondary)] transition duration-150 animate-fade-in" style="animation-delay: ${rowDelay}ms; animation-fill-mode: both;">
-                        <td class="px-4 py-3 font-bold text-primary">Day ${round.day}</td>
-                        <td class="px-4 py-3 text-xs text-gray-500 font-medium">${round.type}</td>
-                        <td class="px-4 py-3 text-right font-semibold text-blue-600">${match[0]}</td>
-                        <td class="px-4 py-3 text-center text-gray-400 text-xs">VS</td>
-                        <td class="px-4 py-3 text-left font-semibold text-red-600">${match[1]}</td>
-                        <td class="px-4 py-3 text-gray-500 text-xs">BO3</td>
-                    </tr>`;
-                    tableBody.innerHTML += row;
-                });
-                rowDelay += 50;
-
-                // Day View
-                let dayCard = `<div class="bg-white rounded-lg p-0 border border-gray-200 overflow-hidden shadow-sm animate-fade-in" style="animation-delay: ${rowDelay}ms; animation-fill-mode: both;">
-                    <h3 class="font-bold text-gray-800 p-3 bg-gray-50 border-b flex justify-between items-center">
-                        <span class="text-primary"><i class="far fa-clock mr-1"></i> Match Day ${round.day}</span>
-                        <span class="text-xs font-normal bg-white px-2 py-1 rounded border text-gray-500">${round.type}</span>
-                    </h3>
-                    <div class="grid grid-cols-1 gap-2 p-3 bg-[var(--secondary)]">`;
-                
-                round.matches.forEach(match => {
-                    dayCard += `<div class="bg-white p-3 rounded shadow-sm flex justify-between items-center border border-gray-100 hover:shadow-md transition">
-                        <div class="w-5/12 text-right font-medium text-blue-700 truncate">${match[0]}</div>
-                        <div class="w-2/12 text-center">
-                             <span class="text-[10px] font-bold text-white bg-gray-300 px-2 py-0.5 rounded-full">VS</span>
-                        </div>
-                        <div class="w-5/12 text-left font-medium text-red-700 truncate">${match[1]}</div>
-                    </div>`;
-                });
-                dayCard += `</div></div>`;
-                dayView.innerHTML += dayCard;
-            });
-        }
-
-        function switchTab(tab) {
-            const listBtn = document.getElementById('tab-list');
-            const dayBtn = document.getElementById('tab-day');
-            const listView = document.getElementById('view-list');
-            const dayView = document.getElementById('view-day');
-
-            if (tab === 'list') {
-                listBtn.className = "flex-1 py-2 text-center tab-active transition duration-300";
-                dayBtn.className = "flex-1 py-2 text-center tab-inactive transition duration-300";
-                listView.classList.remove('hidden');
-                dayView.classList.add('hidden');
-            } else {
-                listBtn.className = "flex-1 py-2 text-center tab-inactive transition duration-300";
-                dayBtn.className = "flex-1 py-2 text-center tab-active transition duration-300";
-                listView.classList.add('hidden');
-                dayView.classList.remove('hidden');
-            }
-        }
-
-        // --- Window Load Event for Loading Screen ---
-        window.addEventListener('load', () => {
-            const loadingScreen = document.getElementById('loadingScreen');
-            // Show for at least 2 seconds (2000ms) before fading out
-            setTimeout(() => {
-                loadingScreen.classList.add('opacity-0');
-                // Remove from DOM after fade out transition (700ms)
-                setTimeout(() => {
-                    loadingScreen.style.display = 'none';
-                }, 700);
-            }, 2000);
-        });
-    </script>
+    <!-- Custom Script -->
+    <script src="script.js"></script>
 </body>
 </html>

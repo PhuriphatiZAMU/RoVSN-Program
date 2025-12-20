@@ -1,0 +1,132 @@
+@import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&display=swap');
+
+/* --- Echo of Destiny Theme --- */
+:root {
+    --primary: #15C8FF;       /* Cyan Aura */
+    --primary-dark: #009BCF;  /* Darker shade for hover */
+    --secondary: #E8F7FF;     /* Echo White */
+    --accent: #FF4B4B;        /* Red for VS/Pot B */
+}
+
+body {
+    font-family: 'Kanit', sans-serif;
+    background-color: var(--secondary);
+}
+
+/* Custom Utility Classes */
+.text-primary { 
+    color: var(--primary); 
+}
+
+.bg-primary { 
+    background-color: var(--primary); 
+}
+
+.bg-primary-hover:hover { 
+    background-color: var(--primary-dark); 
+}
+
+.border-primary { 
+    border-color: var(--primary); 
+}
+
+/* Animations */
+.animate-fade-in {
+    animation: fadeIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    opacity: 0;
+    transform: translateY(10px);
+}
+
+@keyframes fadeIn {
+    from { 
+        opacity: 0; 
+        transform: translateY(10px); 
+    }
+    to { 
+        opacity: 1; 
+        transform: translateY(0); 
+    }
+}
+
+.animate-scale-up {
+    animation: scaleUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes scaleUp {
+    0% { 
+        transform: scale(0.8); 
+        opacity: 0; 
+    }
+    100% { 
+        transform: scale(1); 
+        opacity: 1; 
+    }
+}
+
+.animate-slide-up {
+    animation: slideUp 0.4s ease-out forwards;
+}
+
+@keyframes slideUp {
+    0% { 
+        transform: translateY(20px); 
+        opacity: 0; 
+    }
+    100% { 
+        transform: translateY(0); 
+        opacity: 1; 
+    }
+}
+
+/* Loading Screen Animation */
+.animate-pulse-logo {
+    animation: pulseLogo 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulseLogo {
+    0%, 100% { 
+        opacity: 1; 
+        transform: scale(1); 
+    }
+    50% { 
+        opacity: .85; 
+        transform: scale(1.05); 
+    }
+}
+
+/* Tabs */
+.tab-active {
+    border-bottom: 3px solid var(--primary);
+    color: var(--primary-dark);
+    font-weight: 600;
+}
+
+.tab-inactive {
+    color: #9ca3af;
+}
+
+/* Input Focus Ring */
+.focus-ring-theme:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--primary);
+    border-color: var(--primary);
+}
+
+/* Reveal Modal Styles */
+.reveal-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+}
+
+.team-name-lg {
+    font-size: 1.5rem;
+    font-weight: 700;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.vs-badge-lg {
+    width: 60px;
+    height: 60px;
+    font-size: 1.2rem;
+    box-shadow: 0 0 20px rgba(0,0,0,0.1);
+}
