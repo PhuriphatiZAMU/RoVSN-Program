@@ -38,9 +38,15 @@
 
         <!-- Team Input Section -->
         <div class="bg-white rounded-xl shadow-sm p-6 mb-6 border-t-4 border-primary">
-            <h2 class="text-lg font-semibold mb-4 flex items-center">
-                <i class="fas fa-users-cog mr-2 text-primary"></i> ตั้งค่าทีมแข่ง (16 ทีม)
-            </h2>
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-lg font-semibold flex items-center">
+                    <i class="fas fa-users-cog mr-2 text-primary"></i> ตั้งค่าทีมแข่ง (16 ทีม)
+                </h2>
+                <!-- Connection Status -->
+                <div id="dbStatus" class="text-xs px-2 py-1 rounded bg-gray-100 text-gray-500 flex items-center">
+                    <div class="w-2 h-2 rounded-full bg-gray-400 mr-2"></div> Connecting...
+                </div>
+            </div>
             <textarea id="teamsInput" rows="6" class="w-full p-3 border border-gray-200 rounded-lg focus-ring-theme transition text-sm bg-gray-50 font-mono" placeholder="กรอกชื่อทีม (บรรทัดละ 1 ทีม)">Team 1
 Team 2
 Team 3
@@ -68,7 +74,12 @@ Team 16</textarea>
 
         <!-- Results Section -->
         <div id="resultsArea" class="hidden space-y-8">
-            
+                        <!-- Save Button Area -->
+            <div class="flex justify-end animate-fade-in">
+                <button id="saveToDbBtn" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-6 rounded-lg shadow-lg flex items-center transition transform hover:scale-105">
+                    <i class="fas fa-cloud-upload-alt mr-2"></i> บันทึกข้อมูลลง Database
+                </button>
+            </div>
             <!-- Pots Display -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6"
                 <!-- Pot A -->
@@ -201,7 +212,9 @@ Team 16</textarea>
         </div>
     </div>
 
-    <!-- Custom Script -->
-    <script src="script.js"></script>
+    <!-- Firebase and Custom Script -->
+    <script src="firebase-config.js"></script>
+    <script type="module" src="script.js"></script>
+
 </body>
 </html>

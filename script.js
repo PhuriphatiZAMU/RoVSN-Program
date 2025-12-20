@@ -1,9 +1,90 @@
 // ===========================
+// Firebase Setup
+// ===========================
+let db = null;
+let auth = null;
+let currentUser = null;
+let appId = 'default-app-id';
+let firebaseEnabled = false;
+
+// Initialize Firebase asynchronously
+(async function initializeFirebase() {
+    // Check if Firebase config exists
+    const hasFirebaseConfig = typeof __firebase_config !== 'undefined' && __firebase_config;
+
+    if (hasFirebaseConfig) {
+        // Firebase is configured - import and initialize
+        try {
+            const { initializeApp } = await import("https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js");
+            const { getFirestore, collection, addDoc, serverTimestamp } = await import("https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js");
+            const { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } = await import("https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js");
+
+            const firebaseConfig = JSON.parse(__firebase_config);
+            const app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+            appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+            firebaseEnabled = true;
+
+            // Store Firebase functions globally for later use
+            window.firebaseModules = { collection, addDoc, serverTimestamp };
+
+            // Initialize Authentication
+            const initAuth = async () => {
+                const statusEl = document.getElementById('dbStatus');
+                try {
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        await signInWithCustomToken(auth, __initial_auth_token);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+                } catch (error) {
+                    console.error("Auth Error:", error);
+                    if (statusEl) {
+                        statusEl.innerHTML = `<div class="w-2 h-2 rounded-full bg-red-500 mr-2"></div> Error`;
+                        statusEl.classList.add('text-red-500');
+                    }
+                }
+            };
+
+            onAuthStateChanged(auth, (user) => {
+                currentUser = user;
+                const statusEl = document.getElementById('dbStatus');
+                if (user && statusEl) {
+                    statusEl.innerHTML = `<div class="w-2 h-2 rounded-full bg-green-500 mr-2"></div> Connected`;
+                    statusEl.classList.remove('text-gray-500');
+                    statusEl.classList.add('text-green-600');
+                }
+            });
+
+            await initAuth();
+        } catch (error) {
+            console.error("Firebase initialization error:", error);
+            firebaseEnabled = false;
+            const statusEl = document.getElementById('dbStatus');
+            if (statusEl) {
+                statusEl.innerHTML = `<div class="w-2 h-2 rounded-full bg-yellow-500 mr-2"></div> Offline`;
+                statusEl.classList.add('text-yellow-600');
+            }
+        }
+    } else {
+        // No Firebase config - run in standalone mode
+        console.log("Running in standalone mode (no Firebase configuration detected)");
+        const statusEl = document.getElementById('dbStatus');
+        if (statusEl) {
+            statusEl.innerHTML = `<div class="w-2 h-2 rounded-full bg-gray-400 mr-2"></div> No Database`;
+            statusEl.classList.add('text-gray-500');
+        }
+    }
+})();
+
+// ===========================
 // Helper Functions
 // ===========================
 
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 let skipTriggered = false;
+let generatedData = null; // Store data to be saved
 
 function skipAnimation() {
     skipTriggered = true;
@@ -16,7 +97,7 @@ function skipAnimation() {
 /**
  * Generate internal fixtures for a group using Round-Robin algorithm
  * @param {Array} teams - Array of team names
- * @returns {Array} Array of rounds, each containing matches
+ * @returns {Array} Array of rounds, each containing matches as objects {blue, red}
  */
 function generateInternalFixtures(teams) {
     const n = teams.length;
@@ -26,10 +107,11 @@ function generateInternalFixtures(teams) {
 
     for (let i = 0; i < n - 1; i++) {
         const roundMatches = [];
-        roundMatches.push([fixedTeam, rotatingTeams[0]]);
+        // Changed from array [A, B] to object {blue: A, red: B} for Firestore compatibility
+        roundMatches.push({ blue: fixedTeam, red: rotatingTeams[0] });
 
         for (let j = 1; j < n / 2; j++) {
-            roundMatches.push([rotatingTeams[j], rotatingTeams[rotatingTeams.length - j]]);
+            roundMatches.push({ blue: rotatingTeams[j], red: rotatingTeams[rotatingTeams.length - j] });
         }
 
         rounds.push(roundMatches);
@@ -43,7 +125,7 @@ function generateInternalFixtures(teams) {
  * Generate external fixtures between two groups
  * @param {Array} groupA - First group of teams
  * @param {Array} groupB - Second group of teams
- * @returns {Array} Array of rounds with cross-group matches
+ * @returns {Array} Array of rounds with cross-group matches as objects {blue, red}
  */
 function generateExternalFixtures(groupA, groupB) {
     const rounds = [];
@@ -56,7 +138,8 @@ function generateExternalFixtures(groupA, groupB) {
             const teamA = groupA[i];
             const teamBIndex = (i + r) % n;
             const teamB = groupB[teamBIndex];
-            roundMatches.push([teamA, teamB]);
+            // Changed from array [A, B] to object {blue: A, red: B} for Firestore compatibility
+            roundMatches.push({ blue: teamA, red: teamB });
         }
 
         rounds.push(roundMatches);
@@ -126,9 +209,9 @@ async function runScheduleReveal(schedule) {
             teamBEl.parentElement.parentElement.classList.remove('animate-scale-up');
             void teamAEl.offsetWidth; // Trigger reflow
 
-            // Set content
-            teamAEl.textContent = match[0];
-            teamBEl.textContent = match[1];
+            // Set content - Using object properties instead of array indices
+            teamAEl.textContent = match.blue;
+            teamBEl.textContent = match.red;
             counter.textContent = `Match ${i + 1} of ${round.matches.length} (Total Progress: ${Math.round((currentMatchCount / totalMatches) * 100)}%)`;
             progressBar.style.width = `${(currentMatchCount / totalMatches) * 100}%`;
 
@@ -144,6 +227,57 @@ async function runScheduleReveal(schedule) {
 }
 
 // ===========================
+// Database Save Logic
+// ===========================
+
+/**
+ * Save tournament data to Firestore
+ */
+async function saveDataToFirestore() {
+    if (!firebaseEnabled) {
+        alert("❌ Firebase ไม่ได้ถูกตั้งค่า\n\nกรุณาตั้งค่า Firebase configuration เพื่อใช้ฟีเจอร์บันทึกข้อมูล\nดูวิธีการตั้งค่าใน README.md");
+        return;
+    }
+
+    if (!currentUser) {
+        alert("กรุณารอการเชื่อมต่อกับ Database สักครู่...");
+        return;
+    }
+    if (!generatedData) return;
+
+    const saveBtn = document.getElementById('saveToDbBtn');
+    const originalContent = saveBtn.innerHTML;
+    saveBtn.disabled = true;
+    saveBtn.innerHTML = `<i class="fas fa-spinner fa-spin mr-2"></i> กำลังบันทึก...`;
+
+    try {
+        // Get Firebase modules from global storage
+        const { collection, addDoc, serverTimestamp } = window.firebaseModules;
+        
+        // Using public collection path for shared data
+        const collectionRef = collection(db, 'artifacts', appId, 'public', 'data', 'tournament_schedules');
+        
+        await addDoc(collectionRef, {
+            ...generatedData,
+            savedAt: serverTimestamp(),
+            userId: currentUser.uid
+        });
+
+        saveBtn.innerHTML = `<i class="fas fa-check mr-2"></i> บันทึกสำเร็จ!`;
+        saveBtn.classList.remove('bg-green-500', 'hover:bg-green-600');
+        saveBtn.classList.add('bg-gray-400');
+        
+        alert("บันทึกข้อมูลตารางการแข่งขันเรียบร้อยแล้ว!");
+
+    } catch (e) {
+        console.error("Error adding document: ", e);
+        saveBtn.innerHTML = `<i class="fas fa-exclamation-triangle mr-2"></i> ลองใหม่อีกครั้ง`;
+        saveBtn.disabled = false;
+        alert("เกิดข้อผิดพลาดในการบันทึก: " + e.message);
+    }
+}
+
+// ===========================
 // Main Controller
 // ===========================
 
@@ -156,6 +290,13 @@ async function generateSchedule() {
     const errorMsg = document.getElementById('errorMsg');
     const resultsArea = document.getElementById('resultsArea');
     const btn = document.getElementById('generateBtn');
+    const saveBtn = document.getElementById('saveToDbBtn');
+
+    // Reset Save Button
+    saveBtn.disabled = false;
+    saveBtn.innerHTML = `<i class="fas fa-cloud-upload-alt mr-2"></i> บันทึกข้อมูลลง Database`;
+    saveBtn.classList.add('bg-green-500', 'hover:bg-green-600');
+    saveBtn.classList.remove('bg-gray-400');
 
     // Validation
     if (teams.length !== 16) {
@@ -201,6 +342,14 @@ async function generateSchedule() {
             matches: matches 
         });
     }
+
+    // Store Data for Saving
+    generatedData = {
+        potA: potA,
+        potB: potB,
+        schedule: allRounds,
+        totalTeams: teams.length
+    };
 
     // Render background data
     renderPots(potA, potB);
@@ -263,9 +412,9 @@ function renderSchedule(rounds) {
                     style="animation-delay: ${rowDelay}ms; animation-fill-mode: both;">
                     <td class="px-4 py-3 font-bold text-primary">Day ${round.day}</td>
                     <td class="px-4 py-3 text-xs text-gray-500 font-medium">${round.type}</td>
-                    <td class="px-4 py-3 text-right font-semibold text-blue-600">${match[0]}</td>
+                    <td class="px-4 py-3 text-right font-semibold text-blue-600">${match.blue}</td>
                     <td class="px-4 py-3 text-center text-gray-400 text-xs">VS</td>
-                    <td class="px-4 py-3 text-left font-semibold text-red-600">${match[1]}</td>
+                    <td class="px-4 py-3 text-left font-semibold text-red-600">${match.red}</td>
                     <td class="px-4 py-3 text-gray-500 text-xs">BO3</td>
                 </tr>
             `;
@@ -288,11 +437,11 @@ function renderSchedule(rounds) {
         round.matches.forEach(match => {
             dayCard += `
                 <div class="bg-white p-3 rounded shadow-sm flex justify-between items-center border border-gray-100 hover:shadow-md transition">
-                    <div class="w-5/12 text-right font-medium text-blue-700 truncate">${match[0]}</div>
+                    <div class="w-5/12 text-right font-medium text-blue-700 truncate">${match.blue}</div>
                     <div class="w-2/12 text-center">
                         <span class="text-[10px] font-bold text-white bg-gray-300 px-2 py-0.5 rounded-full">VS</span>
                     </div>
-                    <div class="w-5/12 text-left font-medium text-red-700 truncate">${match[1]}</div>
+                    <div class="w-5/12 text-left font-medium text-red-700 truncate">${match.red}</div>
                 </div>
             `;
         });
@@ -326,7 +475,7 @@ function switchTab(tab) {
 }
 
 // ===========================
-// Window Load Event
+// Window Load Event & Event Listeners
 // ===========================
 
 window.addEventListener('load', () => {
@@ -340,3 +489,17 @@ window.addEventListener('load', () => {
         }, 700);
     }, 2000);
 });
+
+// Event listeners for buttons and tabs
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('tab-list')?.addEventListener('click', () => switchTab('list'));
+    document.getElementById('tab-day')?.addEventListener('click', () => switchTab('day'));
+    document.getElementById('skipBtn')?.addEventListener('click', skipAnimation);
+    document.getElementById('generateBtn')?.addEventListener('click', generateSchedule);
+    document.getElementById('saveToDbBtn')?.addEventListener('click', saveDataToFirestore);
+});
+
+// Make functions globally accessible for inline event handlers
+window.switchTab = switchTab;
+window.skipAnimation = skipAnimation;
+window.generateSchedule = generateSchedule;
