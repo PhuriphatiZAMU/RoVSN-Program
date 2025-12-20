@@ -50,10 +50,36 @@ let firebaseEnabled = false;
             onAuthStateChanged(auth, (user) => {
                 currentUser = user;
                 const statusEl = document.getElementById('dbStatus');
-                if (user && statusEl) {
-                    statusEl.innerHTML = `<div class="w-2 h-2 rounded-full bg-green-500 mr-2"></div> Connected`;
-                    statusEl.classList.remove('text-gray-500');
-                    statusEl.classList.add('text-green-600');
+                const dotEl = document.getElementById('dbStatusDot');
+                const textEl = document.getElementById('dbStatusText');
+                if (user) {
+                    // Prefer granular status elements if present
+                    if (dotEl) {
+                        dotEl.classList.remove('bg-gray-400', 'bg-red-500');
+                        dotEl.classList.add('bg-green-500');
+                    }
+                    if (textEl) {
+                        textEl.textContent = 'Connected';
+                        textEl.classList.remove('text-gray-500', 'text-red-500');
+                        textEl.classList.add('text-green-600');
+                    } else if (statusEl) {
+                        statusEl.innerHTML = `<div class="w-2 h-2 rounded-full bg-green-500 mr-2"></div> Connected`;
+                        statusEl.classList.remove('text-gray-500');
+                        statusEl.classList.add('text-green-600');
+                    }
+                } else {
+                    if (dotEl) {
+                        dotEl.classList.remove('bg-green-500');
+                        dotEl.classList.add('bg-gray-400');
+                    }
+                    if (textEl) {
+                        textEl.textContent = 'Disconnected';
+                        textEl.classList.remove('text-green-600');
+                        textEl.classList.add('text-gray-500');
+                    } else if (statusEl) {
+                        statusEl.innerHTML = `<div class="w-2 h-2 rounded-full bg-gray-400 mr-2"></div> Disconnected`;
+                        statusEl.classList.add('text-gray-500');
+                    }
                 }
             });
 
@@ -253,10 +279,10 @@ async function saveDataToFirestore() {
     try {
         // Get Firebase modules from global storage
         const { collection, addDoc, serverTimestamp } = window.firebaseModules;
-        
-        // Using public collection path for shared data
-        const collectionRef = collection(db, 'artifacts', appId, 'public', 'data', 'tournament_schedules');
-        
+
+        // Save to top-level collection to match requested schema
+        const collectionRef = collection(db, 'tournament_schedules');
+
         await addDoc(collectionRef, {
             ...generatedData,
             savedAt: serverTimestamp(),
@@ -273,6 +299,16 @@ async function saveDataToFirestore() {
         console.error("Error adding document: ", e);
         saveBtn.innerHTML = `<i class="fas fa-exclamation-triangle mr-2"></i> ลองใหม่อีกครั้ง`;
         saveBtn.disabled = false;
+
+        // If debug status box exists, surface error there
+        const statusBox = document.getElementById('systemStatusBox');
+        const statusMessage = document.getElementById('statusMessage');
+        if (statusBox && statusMessage) {
+            statusBox.classList.remove('hidden');
+            statusBox.classList.add('bg-red-50', 'border-red-200', 'text-red-800');
+            statusMessage.textContent = `Save Error: ${e.message}`;
+        }
+
         alert("เกิดข้อผิดพลาดในการบันทึก: " + e.message);
     }
 }
