@@ -212,8 +212,27 @@ Team 16</textarea>
         </div>
     </div>
 
-    <!-- Firebase and Custom Script -->
-    <script src="firebase-config.js"></script>
+    <!-- Firebase Config Inline to avoid 404 on GitHub Pages -->
+    <script>
+        // Inline Firebase configuration (was firebase-config.js)
+        var __firebase_config = JSON.stringify({
+            apiKey: "AIzaSyBp022DX3ejcBUbIgmMAgXh1iOQZ5FcK5Y",
+            authDomain: "rov-draft-f3f8c.firebaseapp.com",
+            projectId: "rov-draft-f3f8c",
+            storageBucket: "rov-draft-f3f8c.firebasestorage.app",
+            messagingSenderId: "683405091548",
+            appId: "1:683405091548:web:435ce7aa6f0552509e8a19",
+            measurementId: "G-7ED6JWF1JH"
+        });
+
+        // App identifier used in Firestore path
+        var __app_id = "rov-sn-tournament-2026";
+
+        // Optional custom auth token (leave null to use anonymous auth)
+        var __initial_auth_token = null;
+    </script>
+
+    <!-- App Script -->
     <script type="module" src="script.js"></script>
 
 </body>
