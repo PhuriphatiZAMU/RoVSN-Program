@@ -4,13 +4,19 @@
 let isServerOnline = false;
 let API_URL = 'http://localhost:3000/api';
 let HEALTH_PATH = '/health';
+let SCHEDULE_PATH = '/schedules';
 
 // Initialize API configuration
 (function initializeAPI() {
-    if (typeof __api_config !== 'undefined' && __api_config) {
-        API_URL = __api_config.baseURL;
-        if (__api_config.endpoints && __api_config.endpoints.health) {
-            HEALTH_PATH = __api_config.endpoints.health;
+    // In module scripts we must read globals via globalThis
+    const cfg = (typeof globalThis !== 'undefined') ? globalThis.__api_config : undefined;
+    if (cfg && cfg.baseURL) {
+        API_URL = cfg.baseURL;
+        if (cfg.endpoints && cfg.endpoints.health) {
+            HEALTH_PATH = cfg.endpoints.health;
+        }
+        if (cfg.endpoints && cfg.endpoints.schedules) {
+            SCHEDULE_PATH = cfg.endpoints.schedules;
         }
     }
     // Check server status on page load
@@ -261,7 +267,7 @@ async function saveDataToMongoDB(data) {
 
     if (isServerOnline) {
         try {
-            const response = await fetch(`${API_URL}/schedules`, {
+            const response = await fetch(`${API_URL}${SCHEDULE_PATH}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
