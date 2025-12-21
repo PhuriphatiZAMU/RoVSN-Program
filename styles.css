@@ -1,0 +1,73 @@
+:root {
+    --primary: #15C8FF;
+    --primary-dark: #0EA6DA;
+    --secondary: #E8F7FF;
+    --text-main: #0f172a;
+}
+
+/* Brand helpers */
+.bg-primary { background-color: var(--primary); }
+.bg-primary-hover:hover { background-color: var(--primary-dark); }
+.border-primary { border-color: var(--primary); }
+.text-primary { color: var(--primary); }
+
+/* Inputs */
+.focus-ring-theme:focus {
+    outline: 2px solid var(--primary);
+    outline-offset: 1px;
+    box-shadow: 0 0 0 4px rgba(21, 200, 255, 0.25);
+}
+
+/* Tabs */
+.tab-active {
+    border-bottom: 2px solid var(--primary);
+    color: var(--primary);
+    font-weight: 700;
+}
+.tab-inactive {
+    border-bottom: 2px solid transparent;
+    color: #94a3b8;
+}
+
+/* Reveal modal pieces */
+.team-name-lg {
+    font-size: clamp(1.6rem, 3vw, 2.4rem);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+}
+.vs-badge-lg {
+    width: 92px;
+    height: 92px;
+    font-size: 1.3rem;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+}
+.reveal-card {
+    box-shadow: 0 16px 45px rgba(0, 0, 0, 0.12);
+    background: linear-gradient(145deg, #ffffff 0%, #f8fcff 100%);
+}
+
+/* Animations */
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes slideUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes scaleUp { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+@keyframes popIn { 0% { transform: scale(0.8); opacity: 0; } 60% { transform: scale(1.05); opacity: 1; } 100% { transform: scale(1); } }
+@keyframes pulseLogo { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+
+.animate-fade-in { animation: fadeIn 0.5s ease forwards; }
+.animate-slide-up { animation: slideUp 0.55s ease forwards; }
+.animate-scale-up { animation: scaleUp 0.45s ease forwards; }
+.animate-pop-in { animation: popIn 0.5s ease forwards; }
+.animate-pulse-logo { animation: pulseLogo 1.8s ease-in-out infinite; }
+.animation-delay-200 { animation-delay: 0.2s; }
+.animation-delay-400 { animation-delay: 0.4s; }
+
+/* Utility tweaks */
+body { background-color: #f5f7fb; color: var(--text-main); }
+.container { max-width: 1100px; }
+.reveal-card .bg-blue-50, .reveal-card .bg-red-50 {
+    transition: transform 150ms ease, box-shadow 150ms ease;
+}
+.reveal-card .bg-blue-50:hover, .reveal-card .bg-red-50:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
