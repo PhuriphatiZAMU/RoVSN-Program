@@ -6,8 +6,7 @@ node_modules/
 .env.local
 .env.*.local
 
-# Build output
-dist/
+# Build output (keep build/, track dist for GitHub Pages)
 build/
 
 # Logs
