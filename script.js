@@ -92,6 +92,7 @@ const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 let skipTriggered = false;
 let generatedData = null; // Store data to be saved
 let modalHideTimeout = null;
+let isGenerating = false; // Prevent duplicate generate/save
 
 function skipAnimation() {
     skipTriggered = true;
@@ -319,84 +320,90 @@ function saveToLocalStorage(data) {
  * Generate and display the tournament schedule
  */
 async function generateSchedule() {
-    const input = document.getElementById('teamsInput').value;
-    const teams = input.split('\n').map(t => t.trim()).filter(t => t !== "");
-    const errorMsg = document.getElementById('errorMsg');
-    const resultsArea = document.getElementById('resultsArea');
-    const btn = document.getElementById('generateBtn');
+    if (isGenerating) return; // Skip if a run is already in progress
+    isGenerating = true;
+    try {
+        const input = document.getElementById('teamsInput').value;
+        const teams = input.split('\n').map(t => t.trim()).filter(t => t !== "");
+        const errorMsg = document.getElementById('errorMsg');
+        const resultsArea = document.getElementById('resultsArea');
+        const btn = document.getElementById('generateBtn');
 
-    // Validation
-    if (teams.length !== 16) {
-        errorMsg.textContent = `❌ จำนวนทีมไม่ถูกต้อง: มี ${teams.length} ทีม (ต้องการ 16 ทีม)`;
-        errorMsg.classList.remove('hidden');
-        return;
-    } else {
-        errorMsg.classList.add('hidden');
+        // Validation
+        if (teams.length !== 16) {
+            errorMsg.textContent = `❌ จำนวนทีมไม่ถูกต้อง: มี ${teams.length} ทีม (ต้องการ 16 ทีม)`;
+            errorMsg.classList.remove('hidden');
+            return;
+        } else {
+            errorMsg.classList.add('hidden');
+        }
+
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> กำลังสร้างตาราง...';
+        resultsArea.classList.add('hidden');
+
+        // Process teams
+        const shuffledTeams = shuffle([...teams]);
+        const potA = shuffledTeams.slice(0, 8);
+        const potB = shuffledTeams.slice(8, 16);
+
+        // Generate rounds
+        const internalA = generateInternalFixtures(potA);
+        const internalB = generateInternalFixtures(potB);
+        const external = generateExternalFixtures(potA, potB);
+
+        const allRounds = [];
+
+        // Phase 1: Internal (4 Days)
+        for (let i = 0; i < 4; i++) {
+            let combined = [...internalA[i], ...internalB[i]];
+            combined = shuffle(combined);
+            allRounds.push({
+                day: i + 1,
+                type: "Internal (Same Pot)",
+                matches: combined
+            });
+        }
+
+        // Phase 2: External (4 Days)
+        for (let i = 0; i < 4; i++) {
+            const matches = shuffle(external[i]);
+            allRounds.push({
+                day: i + 5,
+                type: "External (Cross Pot)",
+                matches: matches
+            });
+        }
+
+        // Store Data for Saving
+        generatedData = {
+            teams: teams,
+            potA: potA,
+            potB: potB,
+            schedule: allRounds,
+            totalTeams: teams.length,
+            createdAt: new Date().toISOString()
+        };
+
+        // Render background data
+        renderPots(potA, potB);
+        renderSchedule(allRounds);
+
+        // Run reveal animation
+        await runScheduleReveal(allRounds);
+
+        // Show final tables
+        resultsArea.classList.remove('hidden');
+        resultsArea.scrollIntoView({ behavior: 'smooth' });
+
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-play-circle mr-2"></i> สร้างและบันทึก (Generate & Save)';
+
+        // Automatically save data to MongoDB (or localStorage fallback)
+        await saveDataToMongoDB(generatedData);
+    } finally {
+        isGenerating = false;
     }
-
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> กำลังสร้างตาราง...';
-    resultsArea.classList.add('hidden');
-
-    // Process teams
-    const shuffledTeams = shuffle([...teams]);
-    const potA = shuffledTeams.slice(0, 8);
-    const potB = shuffledTeams.slice(8, 16);
-
-    // Generate rounds
-    const internalA = generateInternalFixtures(potA);
-    const internalB = generateInternalFixtures(potB);
-    const external = generateExternalFixtures(potA, potB);
-
-    const allRounds = [];
-
-    // Phase 1: Internal (4 Days)
-    for (let i = 0; i < 4; i++) {
-        let combined = [...internalA[i], ...internalB[i]];
-        combined = shuffle(combined);
-        allRounds.push({ 
-            day: i + 1, 
-            type: "Internal (Same Pot)", 
-            matches: combined 
-        });
-    }
-
-    // Phase 2: External (4 Days)
-    for (let i = 0; i < 4; i++) {
-        const matches = shuffle(external[i]);
-        allRounds.push({ 
-            day: i + 5, 
-            type: "External (Cross Pot)", 
-            matches: matches 
-        });
-    }
-
-    // Store Data for Saving
-    generatedData = {
-        teams: teams,
-        potA: potA,
-        potB: potB,
-        schedule: allRounds,
-        totalTeams: teams.length,
-        createdAt: new Date().toISOString()
-    };
-
-    // Render background data
-    renderPots(potA, potB);
-    renderSchedule(allRounds);
-
-    // Run reveal animation
-    await runScheduleReveal(allRounds);
-
-    // Show final tables
-    resultsArea.classList.remove('hidden');
-    resultsArea.scrollIntoView({ behavior: 'smooth' });
-    
-    btn.disabled = false;
-    btn.innerHTML = '<i class="fas fa-play-circle mr-2"></i> สร้างและบันทึก (Generate & Save)';
-
-    // Automatically save data to MongoDB (or localStorage fallback)
-    await saveDataToMongoDB(generatedData);
 }
 
 // ===========================
