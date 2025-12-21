@@ -111,9 +111,55 @@ let firebaseEnabled = false;
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 let skipTriggered = false;
 let generatedData = null; // Store data to be saved
+let modalHideTimeout = null;
 
 function skipAnimation() {
     skipTriggered = true;
+}
+
+// ===========================
+// Modal Helpers
+// ===========================
+
+function hideStatusModal() {
+    const modal = document.getElementById('statusModal');
+    if (!modal) return;
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+
+    if (modalHideTimeout) {
+        clearTimeout(modalHideTimeout);
+        modalHideTimeout = null;
+    }
+}
+
+function showStatusModal({ title, message, type = 'info', autoCloseMs = 0 }) {
+    const modal = document.getElementById('statusModal');
+    const titleEl = document.getElementById('statusModalTitle');
+    const messageEl = document.getElementById('statusModalMessage');
+    const iconEl = document.getElementById('statusModalIcon');
+
+    if (!modal || !titleEl || !messageEl || !iconEl) return;
+
+    const tone = {
+        success: { bg: 'bg-green-100', text: 'text-green-700', icon: 'fa-check-circle' },
+        error: { bg: 'bg-red-100', text: 'text-red-700', icon: 'fa-triangle-exclamation' },
+        info: { bg: 'bg-blue-100', text: 'text-blue-700', icon: 'fa-circle-info' },
+        warning: { bg: 'bg-yellow-100', text: 'text-yellow-800', icon: 'fa-circle-exclamation' }
+    }[type] || { bg: 'bg-blue-100', text: 'text-blue-700', icon: 'fa-circle-info' };
+
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    titleEl.textContent = title || '';
+    messageEl.textContent = message || '';
+
+    iconEl.className = `fas ${tone.icon} ${tone.text}`;
+    modal.querySelector('.status-badge').className = `status-badge inline-flex items-center space-x-2 px-3 py-2 rounded-full text-sm font-semibold ${tone.bg} ${tone.text}`;
+
+    if (modalHideTimeout) clearTimeout(modalHideTimeout);
+    if (autoCloseMs > 0) {
+        modalHideTimeout = setTimeout(hideStatusModal, autoCloseMs);
+    }
 }
 
 // ===========================
@@ -261,20 +307,31 @@ async function runScheduleReveal(schedule) {
  */
 async function saveDataToFirestore() {
     if (!firebaseEnabled) {
-        alert("❌ Firebase ไม่ได้ถูกตั้งค่า\n\nกรุณาตั้งค่า Firebase configuration เพื่อใช้ฟีเจอร์บันทึกข้อมูล\nดูวิธีการตั้งค่าใน README.md");
+        showStatusModal({
+            title: 'ไม่สามารถบันทึกได้',
+            message: 'Firebase ยังไม่ถูกตั้งค่า กรุณาตั้งค่า Firebase configuration แล้วลองใหม่อีกครั้ง (ดู README.md)',
+            type: 'warning'
+        });
         return;
     }
 
     if (!currentUser) {
-        alert("กรุณารอการเชื่อมต่อกับ Database สักครู่...");
+        showStatusModal({
+            title: 'กำลังเชื่อมต่อฐานข้อมูล',
+            message: 'กรุณารอสักครู่ ระบบกำลังเชื่อมต่อกับ Database',
+            type: 'info',
+            autoCloseMs: 2200
+        });
         return;
     }
     if (!generatedData) return;
 
     const saveBtn = document.getElementById('saveToDbBtn');
-    const originalContent = saveBtn.innerHTML;
-    saveBtn.disabled = true;
-    saveBtn.innerHTML = `<i class="fas fa-spinner fa-spin mr-2"></i> กำลังบันทึก...`;
+    const originalContent = saveBtn?.innerHTML;
+    if (saveBtn) {
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = `<i class="fas fa-spinner fa-spin mr-2"></i> กำลังบันทึก...`;
+    }
 
     try {
         // Get Firebase modules from global storage
@@ -289,16 +346,25 @@ async function saveDataToFirestore() {
             userId: currentUser.uid
         });
 
-        saveBtn.innerHTML = `<i class="fas fa-check mr-2"></i> บันทึกสำเร็จ!`;
-        saveBtn.classList.remove('bg-green-500', 'hover:bg-green-600');
-        saveBtn.classList.add('bg-gray-400');
+        if (saveBtn) {
+            saveBtn.innerHTML = `<i class="fas fa-check mr-2"></i> บันทึกสำเร็จ!`;
+            saveBtn.classList.remove('bg-green-500', 'hover:bg-green-600');
+            saveBtn.classList.add('bg-gray-400');
+        }
         
-        alert("บันทึกข้อมูลตารางการแข่งขันเรียบร้อยแล้ว!");
+        showStatusModal({
+            title: 'บันทึกสำเร็จ',
+            message: 'ข้อมูลตารางการแข่งขันถูกบันทึกลงฐานข้อมูลเรียบร้อยแล้ว',
+            type: 'success',
+            autoCloseMs: 2600
+        });
 
     } catch (e) {
         console.error("Error adding document: ", e);
-        saveBtn.innerHTML = `<i class="fas fa-exclamation-triangle mr-2"></i> ลองใหม่อีกครั้ง`;
-        saveBtn.disabled = false;
+        if (saveBtn) {
+            saveBtn.innerHTML = `<i class="fas fa-exclamation-triangle mr-2"></i> ลองใหม่อีกครั้ง`;
+            saveBtn.disabled = false;
+        }
 
         // If debug status box exists, surface error there
         const statusBox = document.getElementById('systemStatusBox');
@@ -309,7 +375,11 @@ async function saveDataToFirestore() {
             statusMessage.textContent = `Save Error: ${e.message}`;
         }
 
-        alert("เกิดข้อผิดพลาดในการบันทึก: " + e.message);
+        showStatusModal({
+            title: 'บันทึกไม่สำเร็จ',
+            message: `เกิดข้อผิดพลาดในการบันทึก: ${e.message}`,
+            type: 'error'
+        });
     }
 }
 
@@ -326,13 +396,6 @@ async function generateSchedule() {
     const errorMsg = document.getElementById('errorMsg');
     const resultsArea = document.getElementById('resultsArea');
     const btn = document.getElementById('generateBtn');
-    const saveBtn = document.getElementById('saveToDbBtn');
-
-    // Reset Save Button
-    saveBtn.disabled = false;
-    saveBtn.innerHTML = `<i class="fas fa-cloud-upload-alt mr-2"></i> บันทึกข้อมูลลง Database`;
-    saveBtn.classList.add('bg-green-500', 'hover:bg-green-600');
-    saveBtn.classList.remove('bg-gray-400');
 
     // Validation
     if (teams.length !== 16) {
@@ -537,7 +600,13 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('tab-day')?.addEventListener('click', () => switchTab('day'));
     document.getElementById('skipBtn')?.addEventListener('click', skipAnimation);
     document.getElementById('generateBtn')?.addEventListener('click', generateSchedule);
-    document.getElementById('saveToDbBtn')?.addEventListener('click', saveDataToFirestore);
+
+    const statusModal = document.getElementById('statusModal');
+    const statusModalClose = document.getElementById('statusModalClose');
+    statusModalClose?.addEventListener('click', hideStatusModal);
+    statusModal?.addEventListener('click', (e) => {
+        if (e.target === statusModal) hideStatusModal();
+    });
 });
 
 // Make functions globally accessible for inline event handlers

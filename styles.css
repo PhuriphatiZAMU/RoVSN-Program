@@ -71,3 +71,6 @@ body { background-color: #f5f7fb; color: var(--text-main); }
     transform: translateY(-4px);
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
 }
+
+/* Modal tweaks */
+.modal-card { animation: fadeIn 0.25s ease; }

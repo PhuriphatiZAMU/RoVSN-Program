@@ -74,12 +74,6 @@ Team 16</textarea>
 
         <!-- Results Section -->
         <div id="resultsArea" class="hidden space-y-8">
-                        <!-- Save Button Area -->
-            <div class="flex justify-end animate-fade-in">
-                <button id="saveToDbBtn" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-6 rounded-lg shadow-lg flex items-center transition transform hover:scale-105">
-                    <i class="fas fa-cloud-upload-alt mr-2"></i> บันทึกข้อมูลลง Database
-                </button>
-            </div>
             <!-- Pots Display -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Pot A -->
@@ -209,6 +203,20 @@ Team 16</textarea>
                 </div>
 
             </div>
+        </div>
+    </div>
+
+    <!-- Status Modal -->
+    <div id="statusModal" class="fixed inset-0 bg-gray-900/70 hidden items-center justify-center z-[120] px-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 relative animate-fade-in modal-card">
+            <button id="statusModalClose" class="absolute top-3 right-3 text-gray-400 hover:text-gray-700 transition" aria-label="Close">
+                <i class="fas fa-times text-lg"></i>
+            </button>
+            <div class="status-badge inline-flex items-center space-x-2 px-3 py-2 rounded-full text-sm font-semibold bg-blue-100 text-blue-700">
+                <i id="statusModalIcon" class="fas fa-circle-info"></i>
+                <span id="statusModalTitle">สถานะ</span>
+            </div>
+            <p id="statusModalMessage" class="mt-4 text-gray-700 leading-relaxed"></p>
         </div>
     </div>
 
