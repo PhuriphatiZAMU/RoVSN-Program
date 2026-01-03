@@ -240,7 +240,7 @@ Team 16</textarea>
     <script>
         // MongoDB API endpoint configuration
         var __api_config = {
-            baseURL: 'https://rov-sn-tournament-api.vercel.app/api',
+            baseURL: '/api',  // [แก้ตรงนี้] จากเดิม 'https://...' หรือ 'http://localhost...' ให้เหลือแค่ '/api'
             endpoints: {
                 health: '/health',
                 schedules: '/schedules'

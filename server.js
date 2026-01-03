@@ -1,30 +1,29 @@
-// server.js - Backend สำหรับเชื่อมต่อ MongoDB
-// วิธีรัน: node server.js
-
-require('dotenv').config(); // Load environment variables
+// server.js - ฉบับแก้ไขสำหรับ Render
+require('dotenv').config();
 
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const bodyParser = require('body-parser');
+const path = require('path'); // [เพิ่ม] เรียกใช้ path
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Middleware
-app.use(cors()); // อนุญาตให้หน้าเว็บเรียกใช้ API ได้
+app.use(cors());
 app.use(bodyParser.json());
 
-// --- การตั้งค่า Database ---
-// ใช้ MongoDB Atlas จาก environment variable (.env file)
-// Fallback เป็น localhost ถ้าไม่มี .env
+// [เพิ่ม] ให้ Express เข้าถึงไฟล์ต่างๆ ใน Folder โปรเจกต์ได้ (เช่น html, css, js, รูปภาพ)
+app.use(express.static(__dirname));
+
+// Database Connection
 const MONGO_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/rov_sn_tournament_2026';
 
 mongoose.connect(MONGO_URI)
-    .then(() => console.log(`✅ MongoDB Connected to: ${MONGO_URI}`))
+    .then(() => console.log(`✅ MongoDB Connected`))
     .catch(err => console.error('❌ MongoDB Connection Error:', err));
 
-// 2. สร้าง Schema (โครงสร้างข้อมูล)
 const ScheduleSchema = new mongoose.Schema({
     teams: [String],
     potA: [String],
@@ -33,22 +32,16 @@ const ScheduleSchema = new mongoose.Schema({
     createdAt: { type: Date, default: Date.now }
 });
 
-// สร้าง Model โดยระบุชื่อ Collection ให้ชัดเจนว่า 'schedules'
 const Schedule = mongoose.model('Schedule', ScheduleSchema, 'schedules');
 
-// 3. API Routes
-
-// Root hint
-app.get('/', (req, res) => {
-    res.status(200).send('ROV SN Tournament API is running. Use /api/health for status.');
-});
+// --- API Routes ---
 
 // Health Check
 app.get('/api/health', (req, res) => {
     res.status(200).json({ status: 'ok', message: 'Server is running', db: 'rov_sn_tournament_2026' });
 });
 
-// บันทึกข้อมูล (Create)
+// Create Schedule
 app.post('/api/schedules', async (req, res) => {
     try {
         const newSchedule = new Schedule(req.body);
@@ -60,7 +53,7 @@ app.post('/api/schedules', async (req, res) => {
     }
 });
 
-// ดึงข้อมูลทั้งหมด (Read)
+// Get Schedules
 app.get('/api/schedules', async (req, res) => {
     try {
         const schedules = await Schedule.find().sort({ createdAt: -1 });
@@ -70,9 +63,12 @@ app.get('/api/schedules', async (req, res) => {
     }
 });
 
-// เริ่ม Server
+// [แก้ไข] Route หลัก ('/') ให้ส่งไฟล์ index.html แทนข้อความ
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+// Start Server
 app.listen(PORT, () => {
-    console.log(`🚀 Server running on http://localhost:${PORT}`);
-    console.log(`📡 API Endpoint: http://localhost:${PORT}/api/schedules`);
-    console.log(`💾 Target Database: rov_sn_tournament_2026`);
+    console.log(`🚀 Server running on port ${PORT}`);
 });
