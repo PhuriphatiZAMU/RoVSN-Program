@@ -1,11 +1,11 @@
-// server.js - ฉบับแก้ไขสำหรับ Render
+// server.js - ฉบับแก้ไขสมบูรณ์ (Fix 404 & Check /api)
 require('dotenv').config();
 
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const bodyParser = require('body-parser');
-const path = require('path'); // [เพิ่ม] เรียกใช้ path
+const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -14,11 +14,12 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(bodyParser.json());
 
-// [เพิ่ม] ให้ Express เข้าถึงไฟล์ต่างๆ ใน Folder โปรเจกต์ได้ (เช่น html, css, js, รูปภาพ)
+// ให้ Express เข้าถึงไฟล์ต่างๆ ใน Folder โปรเจกต์ได้ (html, css, js, รูปภาพ)
 app.use(express.static(__dirname));
 
 // Database Connection
-const MONGO_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/rov_sn_tournament_2026';
+// [แก้] รองรับทั้ง MONGO_URI และ MONGODB_URI เพื่อความชัวร์
+const MONGO_URI = process.env.MONGO_URI || process.env.MONGODB_URI || 'mongodb://localhost:27017/rov_sn_tournament_2026';
 
 mongoose.connect(MONGO_URI)
     .then(() => console.log(`✅ MongoDB Connected`))
@@ -36,7 +37,12 @@ const Schedule = mongoose.model('Schedule', ScheduleSchema, 'schedules');
 
 // --- API Routes ---
 
-// Health Check
+// [เพิ่มใหม่] Route สำหรับ /api (แก้ปัญหา 404 ที่ Frontend หาไม่เจอ)
+app.get('/api', (req, res) => {
+    res.status(200).json({ message: "API is running", status: "ok" });
+});
+
+// Health Check (เดิม)
 app.get('/api/health', (req, res) => {
     res.status(200).json({ status: 'ok', message: 'Server is running', db: 'rov_sn_tournament_2026' });
 });
@@ -63,7 +69,7 @@ app.get('/api/schedules', async (req, res) => {
     }
 });
 
-// [แก้ไข] Route หลัก ('/') ให้ส่งไฟล์ index.html แทนข้อความ
+// Route หลัก ('/') ให้ส่งไฟล์ index.html แทนข้อความ
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
