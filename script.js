@@ -26,6 +26,9 @@ let SCHEDULE_PATH = '/schedules';
 // Also re-check after DOM is ready to ensure elements exist
 document.addEventListener('DOMContentLoaded', () => {
     setTimeout(checkServerStatus, 0);
+    document.getElementById('tab-list')?.addEventListener('click', () => switchTab('list'));
+    document.getElementById('tab-day')?.addEventListener('click', () => switchTab('day'));
+    document.getElementById('generateBtn')?.addEventListener('click', generateSchedule);
 });
 
 // Check MongoDB Server Connection Status
@@ -519,33 +522,6 @@ function switchTab(tab) {
 // ===========================
 // Window Load Event & Event Listeners
 // ===========================
-
-function hideLoadingScreen() {
-    const loadingScreen = document.getElementById('loadingScreen');
-    if (!loadingScreen) return;
-    loadingScreen.classList.add('opacity-0');
-    setTimeout(() => {
-        loadingScreen.style.display = 'none';
-    }, 700);
-}
-
-// Hide loader as soon as DOM is ready (faster than waiting for all assets)
-document.addEventListener('DOMContentLoaded', () => {
-    setTimeout(hideLoadingScreen, 500);
-});
-
-// Safety: also hide on full load in case DOMContentLoaded was missed
-window.addEventListener('load', () => {
-    setTimeout(hideLoadingScreen, 0);
-});
-
-// Event listeners for buttons and tabs
-document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('tab-list')?.addEventListener('click', () => switchTab('list'));
-    document.getElementById('tab-day')?.addEventListener('click', () => switchTab('day'));
-    document.getElementById('skipBtn')?.addEventListener('click', skipAnimation);
-    document.getElementById('generateBtn')?.addEventListener('click', generateSchedule);
-});
 
 // Make functions globally accessible for inline event handlers
 window.switchTab = switchTab;

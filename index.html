@@ -51,53 +51,6 @@
 </head>
 <body class="text-gray-800 relative">
 
-    <!-- ========================================== -->
-    <!-- ส่วน Loading Screen (วางหลัง <body> ทันที) -->
-    <!-- ========================================== -->
-
-    <div id="global-loader" class="fixed inset-0 z-[9999] bg-[#0B1120] flex flex-col items-center justify-center transition-opacity duration-500 ease-out">
-        
-        <!-- 1. Logo Animation Container -->
-        <div class="relative w-32 h-32 mb-8">
-            <!-- Ping Effect (วงคลื่น) -->
-            <div class="absolute inset-0 border-4 border-[#15C8FF] rounded-full animate-ping opacity-20"></div>
-            
-            <!-- Spinning Ring (วงแหวนหมุน) -->
-            <div class="absolute inset-0 border-4 border-t-[#15C8FF] border-r-transparent border-b-[#15C8FF] border-l-transparent rounded-full animate-spin"></div>
-            
-            <!-- Center Logo (โลโก้ตรงกลาง) -->
-            <div class="absolute inset-3 bg-white rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(21,200,255,0.6)] overflow-hidden p-1">
-                <!-- เปลี่ยน src เป็นรูปโลโก้ของคุณ ถ้ามี -->
-                <img src="RoV Logo.png" class="w-full h-full object-cover rounded-full" alt="Logo">
-                <!-- หรือใช้ไอคอน -->
-                <!-- <i class="fas fa-trophy text-[#15C8FF] text-4xl"></i> -->
-            </div>
-        </div>
-        
-        <!-- 2. Text Content -->
-        <div class="text-center z-10">
-            <h2 class="text-white text-2xl font-bold tracking-[0.2em] font-heading mb-3 uppercase">
-                ROV SN <span class="text-[#15C8FF] drop-shadow-[0_0_10px_rgba(21,200,255,0.8)]">Tournament</span>
-            </h2>
-            
-            <!-- Status Indicator -->
-            <div class="flex items-center justify-center gap-3 text-gray-400 text-sm bg-[#1e293b] py-2 px-4 rounded-full border border-gray-700">
-                <span class="relative flex h-3 w-3">
-                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                  <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
-                </span>
-                <span id="loading-text" class="animate-pulse">Connecting to MongoDB...</span>
-            </div>
-        </div>
-
-        <!-- Background Decoration (Optional) -->
-        <div class="absolute inset-0 bg-[url('https://cdn.pixabay.com/photo/2017/08/30/01/05/milky-way-2695569_1280.jpg')] opacity-10 bg-cover bg-center pointer-events-none mix-blend-overlay"></div>
-    </div>
-
-    <!-- ========================================== -->
-    <!-- จบส่วน Loading Screen -->
-    <!-- ========================================== -->
-
     <div id="appMain" class="container mx-auto px-4 py-8 max-w-4xl app-hidden">
         <!-- Header -->
         <div class="text-center mb-8">
@@ -294,29 +247,6 @@ Team 16</textarea>
             },
             timeout: 3000
         };
-    </script>
-
-    <!-- Script สำหรับซ่อน Loading Screen -->
-    <script>
-        // ฟังก์ชันซ่อน Loading Screen (เรียกใช้เมื่อไหร่ก็ได้)
-        window.hideLoadingScreen = function() {
-            const loader = document.getElementById('global-loader');
-            if (loader) {
-                loader.classList.add('opacity-0', 'pointer-events-none');
-                setTimeout(() => {
-                    loader.style.display = 'none';
-                }, 500); // รอ animation 0.5 วินาทีแล้วค่อยลบ
-            }
-        };
-
-        // วิธีที่ 1: ซ่อนอัตโนมัติเมื่อเว็บโหลดเสร็จทุกอย่าง (รูป, สคริปต์)
-        window.addEventListener('load', () => {
-            // หน่วงเวลาเล็กน้อยเพื่อให้เห็นโลโก้เท่ๆ (1.5 วินาที)
-            setTimeout(window.hideLoadingScreen, 1500);
-        });
-
-        // วิธีที่ 2 (Advance): ถ้าคุณอยากให้ซ่อน "หลังจาก" ดึงข้อมูล Database เสร็จ
-        // ให้เอาบรรทัดข้างบนออก แล้วไปเรียก window.hideLoadingScreen() ในไฟล์ app.js แทน
     </script>
 
     <!-- App Script -->

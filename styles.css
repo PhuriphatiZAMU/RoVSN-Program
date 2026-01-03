@@ -71,8 +71,6 @@
     }
 }
 
-@keyframes popIn { 0% { transform: scale(0.8); opacity: 0; } 60% { transform: scale(1.05); opacity: 1; } 100% { transform: scale(1); } }
-
 /* Loading Screen Animations */
 @keyframes pulseLogo {
     0%, 100% {
@@ -97,14 +95,9 @@
     opacity: 0;
 }
 
-.animate-pop-in { animation: popIn 0.5s ease forwards; }
-
 .animate-pulse-logo {
     animation: pulseLogo 1.8s ease-in-out infinite;
 }
-
-.animation-delay-200 { animation-delay: 0.2s; }
-.animation-delay-400 { animation-delay: 0.4s; }
 
 /* Utility tweaks */
 body { background-color: #f5f7fb; color: var(--text-main); }
